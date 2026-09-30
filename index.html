@@ -1,0 +1,2202 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cloto AI — OpenRouter Free</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        :root{--p:#7c3aed;--p-l:#a78bfa;--p-glow:rgba(124,58,237,.35);--bg:#08080f;--sur:#101018;--sur2:#16161f;--sur3:#1e1e2a;--brd:#25253a;--txt:#e2e2f0;--txt2:#8888aa;--txt3:#44445a;--err:#f87171;--sw:290px;--gold:#f59e0b;--gold-glow:rgba(245,158,11,.3)}
+        html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);overflow:hidden;-webkit-font-smoothing:antialiased}
+        ::-webkit-scrollbar{width:4px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--brd);border-radius:99px}
+
+        #geminiMicContainer{position:fixed;z-index:100;pointer-events:none;top:50%;left:50%;width:180px;height:180px;opacity:0;transition:opacity .5s ease,transform .5s ease;transform:translate(-50%,-50%) scale(.6)}
+        #geminiMicContainer.active{opacity:1;transform:translate(-50%,-50%) scale(1)}
+        #geminiMicContainer .mic-glow{position:absolute;width:130%;height:130%;top:-15%;left:-15%;border-radius:50%;background:conic-gradient(from 0deg,#ff0055,#ff5000,#ffcc00,#00ff66,#00ffff,#0066ff,#7f00ff,#ff00aa,#ff0055);filter:blur(40px);opacity:.7;animation:micSpin 4s linear infinite}
+        #geminiMicContainer .mic-star{position:absolute;inset:0;background:conic-gradient(from var(--mic-angle,0deg),#ff0055,#ff5000,#ffcc00,#00ff66,#00ffff,#0066ff,#7f00ff,#ff00aa,#ff0055);clip-path:polygon(50% 0%,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0% 50%,38% 38%);animation:micSpin 3s linear infinite,micPulse 1.8s ease-in-out infinite alternate}
+        #geminiMicContainer .mic-star::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.6),transparent 60%);mix-blend-mode:overlay;pointer-events:none}
+        @keyframes micSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        @keyframes micPulse{0%{transform:scale(.92)}100%{transform:scale(1.08)}}
+        #geminiMicContainer .mic-sparkles{position:absolute;inset:-30%;pointer-events:none}
+        #geminiMicContainer .mic-sparkles span{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.6);animation:sparkleFloat 2s ease-in-out infinite;opacity:0}
+        #geminiMicContainer .mic-sparkles span:nth-child(1){top:5%;left:50%;animation-delay:0s}
+        #geminiMicContainer .mic-sparkles span:nth-child(2){top:25%;right:0%;animation-delay:.4s}
+        #geminiMicContainer .mic-sparkles span:nth-child(3){bottom:15%;right:10%;animation-delay:.8s}
+        #geminiMicContainer .mic-sparkles span:nth-child(4){bottom:5%;left:20%;animation-delay:1.2s}
+        #geminiMicContainer .mic-sparkles span:nth-child(5){top:10%;left:5%;animation-delay:1.6s}
+        #geminiMicContainer .mic-sparkles span:nth-child(6){top:45%;left:-5%;animation-delay:.2s}
+        #geminiMicContainer .mic-sparkles span:nth-child(7){bottom:0%;left:45%;animation-delay:.6s}
+        #geminiMicContainer .mic-sparkles span:nth-child(8){top:0%;right:15%;animation-delay:1s}
+        @keyframes sparkleFloat{0%{opacity:0;transform:translate(0,0) scale(0)}30%{opacity:1;transform:translate(var(--tx,0),var(--ty,-20px)) scale(1.5)}70%{opacity:.6;transform:translate(var(--tx,0),var(--ty,-40px)) scale(1)}100%{opacity:0;transform:translate(var(--tx,0),var(--ty,-60px)) scale(0)}}
+
+        .gemini-burst{position:fixed;z-index:150;pointer-events:none;display:none;transform:translate(-50%,-50%);width:140px;height:140px;opacity:0;transition:opacity .4s ease,transform .4s ease}
+        .gemini-burst.show{display:block;opacity:1;transform:translate(-50%,-50%) scale(1)}
+        .gemini-burst .burst-glow{position:absolute;width:140%;height:140%;top:-20%;left:-20%;border-radius:50%;background:conic-gradient(from 0deg,#ff0055,#ff5000,#ffcc00,#00ff66,#00ffff,#0066ff,#7f00ff,#ff00aa,#ff0055);filter:blur(35px);opacity:.75;animation:burstSpin 4s linear infinite}
+        .gemini-burst .burst-star{position:absolute;inset:0;background:conic-gradient(from var(--angle,0deg),#ff0055,#ff5000,#ffcc00,#00ff66,#00ffff,#0066ff,#7f00ff,#ff00aa,#ff0055);clip-path:polygon(50% 0%,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0% 50%,38% 38%);animation:burstSpin 4s linear infinite,burstPulse 3s ease-in-out infinite alternate}
+        .gemini-burst .burst-star::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.7),transparent 60%);mix-blend-mode:overlay;pointer-events:none}
+        .gemini-burst .burst-sparkles{position:absolute;inset:-50%;pointer-events:none}
+        .gemini-burst .burst-sparkles span{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.6);animation:sparkleFloat2 1.5s ease-out forwards;opacity:0}
+        .gemini-burst .burst-sparkles span:nth-child(1){top:10%;left:50%;animation-delay:.1s}
+        .gemini-burst .burst-sparkles span:nth-child(2){top:30%;right:5%;animation-delay:.3s}
+        .gemini-burst .burst-sparkles span:nth-child(3){bottom:20%;right:15%;animation-delay:.5s}
+        .gemini-burst .burst-sparkles span:nth-child(4){bottom:10%;left:20%;animation-delay:.7s}
+        .gemini-burst .burst-sparkles span:nth-child(5){top:15%;left:10%;animation-delay:.9s}
+        .gemini-burst .burst-sparkles span:nth-child(6){top:50%;left:0%;animation-delay:1.1s}
+        .gemini-burst .burst-sparkles span:nth-child(7){bottom:5%;left:50%;animation-delay:1.3s}
+        .gemini-burst .burst-sparkles span:nth-child(8){top:5%;right:20%;animation-delay:.2s}
+        @keyframes burstSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        @keyframes burstPulse{0%{transform:scale(.9)}100%{transform:scale(1.1)}}
+        @keyframes sparkleFloat2{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--tx,0),var(--ty,-60px)) scale(0)}}
+
+        #authScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200;overflow-y:auto;padding:20px}
+        #authScreen::before{content:'';position:fixed;top:-160px;left:-160px;width:600px;height:600px;background:radial-gradient(circle,rgba(124,58,237,.18),transparent 65%);pointer-events:none}
+        #authScreen::after{content:'';position:fixed;bottom:-100px;right:-100px;width:420px;height:420px;background:radial-gradient(circle,rgba(192,132,252,.1),transparent 65%);pointer-events:none}
+        .auth-card{background:linear-gradient(150deg,#14141e,#0e0e18);border:1px solid var(--brd);border-radius:24px;padding:42px 40px;width:100%;max-width:420px;box-shadow:0 40px 100px rgba(0,0,0,.7),0 0 0 1px rgba(124,58,237,.07);animation:cardIn .5s cubic-bezier(.16,1,.3,1);position:relative;z-index:1}
+        @media(max-width:480px){.auth-card{padding:32px 24px;border-radius:20px}}
+        @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(.97)}to{opacity:1;transform:none}}
+        .auth-logo{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;background:linear-gradient(135deg,#7c3aed,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;letter-spacing:-.5px}
+        .auth-tagline{font-size:13px;color:var(--txt3);margin-bottom:32px}
+        .auth-tabs{display:flex;background:var(--sur3);border-radius:12px;padding:4px;margin-bottom:26px;gap:4px}
+        .auth-tab{flex:1;padding:9px;border:none;background:transparent;color:var(--txt2);border-radius:9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;transition:all .25s}
+        .auth-tab.active{background:var(--p);color:#fff;box-shadow:0 4px 14px var(--p-glow)}
+        .auth-form{display:flex;flex-direction:column;gap:13px}
+        .field-group{display:flex;flex-direction:column;gap:5px}
+        .field-label{font-size:11px;color:var(--txt2);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+        .field-wrap{position:relative}
+        .field-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:13px;pointer-events:none}
+        .auth-input{width:100%;padding:12px 13px 12px 36px;background:var(--sur2);border:1px solid var(--brd);border-radius:10px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+        .auth-input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(124,58,237,.14)}
+        .auth-input::placeholder{color:var(--txt3)}
+        @media(max-width:480px){.auth-input{font-size:16px}}
+        .auth-submit{margin-top:4px;padding:13px;background:linear-gradient(135deg,#7c3aed,#9d5cf5);color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.2px;transition:all .25s;box-shadow:0 6px 22px var(--p-glow)}
+        .auth-submit:active{transform:scale(.98)}
+        .auth-submit.ghost{background:var(--sur2);box-shadow:none;border:1px solid var(--brd);font-size:14px;color:var(--txt2)}
+        .auth-error{font-size:12.5px;color:var(--err);background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);border-radius:8px;padding:9px 12px;display:none}
+        .auth-error.show{display:block}
+        .auth-divider{display:flex;align-items:center;gap:10px;margin:2px 0}
+        .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--brd)}
+        .auth-divider span{font-size:12px;color:var(--txt3)}
+
+        #xaiMotif{position:fixed;inset:0;z-index:190;display:none;background:#000;overflow:hidden}
+        #xaiLogoMark{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-start;will-change:transform,opacity;opacity:0}
+        #xaiLogoMark svg{height:100vh;width:auto;transform:translateX(-18%)}
+        #xaiGlowPanel{position:absolute;top:-30%;bottom:-30%;right:0;width:100vw;display:flex;flex-direction:column;mask-image:linear-gradient(to right,transparent 0%,#fff 45%);-webkit-mask-image:linear-gradient(to right,transparent 0%,#fff 45%);will-change:transform,opacity;opacity:0}
+        .xai-glow-top{flex:1;background:conic-gradient(from 180deg at 99% 40%,rgb(255,255,255) 18deg,rgb(255,208,134) 36deg,rgba(17,17,17,0) 90deg,rgba(17,17,17,0) 342deg,rgb(255,255,255) 360deg)}
+        .xai-glow-bot{flex:1;background:conic-gradient(from 0deg at 99% 60%,rgb(255,255,255) 0deg,rgba(17,17,17,0) 18deg,rgba(17,17,17,0) 270deg,rgb(255,208,134) 324deg,rgb(255,255,255) 342deg)}
+        #xaiCta{position:absolute;bottom:0;left:0;right:0;display:flex;flex-direction:column;align-items:center;padding:48px 24px;gap:14px;z-index:10;opacity:0;pointer-events:none;transition:opacity .5s ease,transform .5s ease;transform:translateY(20px)}
+        #xaiCta.visible{opacity:1;pointer-events:auto;transform:translateY(0)}
+        .xai-pill{font-size:10px;color:rgba(255,208,134,.85);letter-spacing:3px;text-transform:uppercase;font-weight:700;font-family:'Syne',sans-serif;border:1px solid rgba(255,208,134,.25);padding:5px 16px;border-radius:99px;background:rgba(255,208,134,.06);backdrop-filter:blur(8px)}
+        .xai-headline{font-family:'Syne',sans-serif;font-size:clamp(22px,4vw,34px);font-weight:800;color:#fff;text-align:center;line-height:1.2;letter-spacing:-.5px}
+        .xai-headline span{background:linear-gradient(90deg,#ffd086,#fff 60%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .xai-cta-btn{margin-top:6px;padding:15px 40px;background:rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;letter-spacing:.3px;transition:all .3s;box-shadow:0 0 0 0 rgba(255,208,134,0)}
+        .xai-cta-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(255,208,134,.5);box-shadow:0 8px 40px rgba(255,208,134,.18),0 0 0 1px rgba(255,208,134,.2);transform:translateY(-2px)}
+        .xai-cta-btn:active{transform:scale(.97)}
+        .xai-skip{font-size:12px;color:rgba(255,255,255,.28);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;transition:color .2s;letter-spacing:.3px}
+        .xai-skip:hover{color:rgba(255,255,255,.5)}
+
+        #appScreen{display:none;position:fixed;inset:0}
+        #appScreen.visible{display:flex}
+        .app{display:flex;width:100%;height:100%;overflow:hidden}
+
+        .sidebar{width:var(--sw);background:var(--sur);border-right:1px solid var(--brd);display:flex;flex-direction:column;padding:18px 16px;gap:12px;flex-shrink:0;transition:transform .3s cubic-bezier(.16,1,.3,1);z-index:50}
+        @media(max-width:767px){.sidebar{position:fixed;left:0;top:0;bottom:0;width:280px;transform:translateX(-100%);box-shadow:8px 0 40px rgba(0,0,0,.5)}.sidebar.open{transform:translateX(0)}}
+        .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:49}
+        .sidebar-backdrop.show{display:block}
+        .logo{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;background:linear-gradient(135deg,#7c3aed,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.3px;flex-shrink:0}
+        .user-bar{display:flex;align-items:center;gap:9px;background:var(--sur2);border:1px solid var(--brd);border-radius:12px;padding:9px 12px;flex-shrink:0}
+        .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#c084fc);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+        .user-info{flex:1;min-width:0}
+        .user-name{font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .user-role{font-size:11px;color:var(--txt3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .logout-btn{background:none;border:none;color:var(--txt3);cursor:pointer;padding:5px;border-radius:7px;font-size:13px;transition:color .2s,background .2s;flex-shrink:0}
+        .logout-btn:hover{color:var(--err);background:rgba(248,113,113,.1)}
+        .voice-toggle-row{display:flex;align-items:center;gap:10px;background:var(--sur2);padding:8px 12px;border-radius:10px;border:1px solid var(--brd);flex-shrink:0}
+        .voice-toggle-row label{font-size:12px;color:var(--txt2);font-weight:600;letter-spacing:.3px;text-transform:uppercase;flex:1}
+        .toggle-switch{position:relative;width:44px;height:24px;background:var(--sur3);border-radius:99px;cursor:pointer;transition:all .3s;border:1px solid var(--brd);flex-shrink:0}
+        .toggle-switch.active{background:var(--p);border-color:var(--p);box-shadow:0 0 16px var(--p-glow)}
+        .toggle-switch .toggle-knob{position:absolute;top:2px;left:2px;width:18px;height:18px;background:#fff;border-radius:50%;transition:all .3s;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+        .toggle-switch.active .toggle-knob{left:22px}
+        .voice-mode-row{display:flex;align-items:center;gap:10px;background:var(--sur2);padding:8px 12px;border-radius:10px;border:1px solid var(--brd);flex-shrink:0}
+        .voice-mode-row label{font-size:12px;color:var(--txt2);font-weight:600;letter-spacing:.3px;text-transform:uppercase;flex:1}
+        .voice-mode-row .toggle-switch.active{background:#10b981;border-color:#10b981;box-shadow:0 0 16px rgba(16,185,129,.35)}
+        .settings{background:var(--sur2);padding:13px;border-radius:12px;border:1px solid var(--brd);flex-shrink:0}
+        .settings label{display:block;margin:9px 0 4px;font-size:11px;color:var(--txt2);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+        .settings label:first-child{margin-top:0}
+        .settings input{width:100%;padding:9px 11px;background:var(--sur3);border:1px solid var(--brd);border-radius:8px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+        .settings input:focus{border-color:var(--p)}
+        .settings input::placeholder{color:var(--txt3)}
+        .settings .hint{font-size:10px;color:var(--txt3);margin-top:4px;display:block;font-weight:400;text-transform:none;letter-spacing:0}
+        .settings .free-badge{background:rgba(16,185,129,.15);color:#10b981;padding:1px 8px;border-radius:99px;font-size:9px;font-weight:600;margin-left:4px;border:1px solid rgba(16,185,129,.2)}
+        .settings .model-recommend{color:#10b981;font-size:10px;font-weight:500;background:rgba(16,185,129,.08);padding:2px 10px;border-radius:99px;display:inline-block;margin-top:2px;border:1px solid rgba(16,185,129,.15)}
+        .new-chat{width:100%;padding:12px;background:linear-gradient(135deg,#7c3aed,#9d5cf5);color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.2px;transition:all .25s;box-shadow:0 4px 16px rgba(124,58,237,.3);flex-shrink:0}
+        .new-chat:active{transform:scale(.98)}
+        .history-label{font-size:10px;color:var(--txt3);font-weight:700;letter-spacing:.8px;text-transform:uppercase;flex-shrink:0}
+        .history-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+        .history-item{padding:9px 11px;border-radius:9px;font-size:13px;color:var(--txt2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s,color .15s;border:1px solid transparent}
+        .history-item:hover{background:var(--sur2);color:var(--txt)}
+        .history-item.active{background:rgba(124,58,237,.12);color:var(--p-l);border-color:rgba(124,58,237,.2)}
+
+        .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+        header{height:58px;padding:0 18px;background:var(--sur);border-bottom:1px solid var(--brd);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+        .header-left{display:flex;align-items:center;gap:10px}
+        .menu-btn{display:none;background:none;border:none;color:var(--txt2);font-size:18px;cursor:pointer;padding:6px;border-radius:8px;transition:color .2s,background .2s}
+        .menu-btn:hover{color:var(--txt);background:var(--sur2)}
+        @media(max-width:767px){.menu-btn{display:flex;align-items:center}}
+        .header-image{height:42px;width:42px;border-radius:50%;object-fit:cover;border:2px solid var(--p);flex-shrink:0;background:var(--sur2);box-shadow:0 0 20px var(--p-glow);transition:all .3s ease}
+        .header-image:hover{transform:scale(1.05);border-color:var(--p-l);box-shadow:0 0 30px var(--p-glow)}
+        .header-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--txt2);display:flex;align-items:center;gap:10px}
+        .token-bar{display:flex;align-items:center;gap:8px;background:var(--sur2);padding:4px 12px 4px 14px;border-radius:50px;border:1px solid var(--brd);flex-shrink:0}
+        .token-bar .token-icon{color:var(--gold);font-size:14px}
+        .token-bar .token-count{font-size:13px;font-weight:600;color:var(--txt);min-width:20px;text-align:center}
+        .token-bar .token-count.zero{color:var(--err)}
+        .token-bar .token-label{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+        .redeem-btn{background:linear-gradient(135deg,var(--gold),#d97706);color:#fff;border:none;border-radius:50px;padding:4px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .25s;box-shadow:0 2px 12px var(--gold-glow);display:flex;align-items:center;gap:5px;flex-shrink:0;height:28px}
+        .redeem-btn:hover{transform:scale(1.05);box-shadow:0 4px 20px var(--gold-glow)}
+        .redeem-btn:active{transform:scale(.95)}
+        .redeem-btn i{font-size:12px}
+        .redeem-btn.redeemed{background:#10b981;box-shadow:0 2px 12px rgba(16,185,129,.3)}
+        .header-right{display:flex;align-items:center;gap:8px}
+        .header-right .excel-header-btn{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#10b981;border-radius:50px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;gap:4px;height:28px}
+        .header-right .excel-header-btn:hover{background:rgba(16,185,129,.2);transform:scale(1.04)}
+
+        #redeemModal{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+        #redeemModal.show{display:flex}
+        .redeem-modal-card{background:var(--sur2);border:1px solid var(--brd);border-radius:22px;padding:36px 32px 30px;width:100%;max-width:380px;text-align:center;animation:cardIn .3s cubic-bezier(.16,1,.3,1)}
+        .redeem-modal-card .redeem-icon{font-size:48px;color:var(--gold);margin-bottom:12px;display:block}
+        .redeem-modal-card h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--txt);margin-bottom:8px}
+        .redeem-modal-card p{font-size:13px;color:var(--txt2);margin-bottom:20px;line-height:1.5}
+        .redeem-modal-card .redeem-input-group{display:flex;gap:8px;margin-bottom:12px}
+        .redeem-modal-card .redeem-input-group input{flex:1;padding:12px 14px;background:var(--sur3);border:1px solid var(--brd);border-radius:10px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;text-align:center;letter-spacing:2px;font-weight:600}
+        .redeem-modal-card .redeem-input-group input:focus{border-color:var(--gold)}
+        .redeem-modal-card .redeem-input-group input::placeholder{color:var(--txt3);letter-spacing:0;font-weight:400}
+        .redeem-modal-card .redeem-submit{padding:12px 20px;background:linear-gradient(135deg,var(--gold),#d97706);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .25s;box-shadow:0 4px 16px var(--gold-glow);width:100%}
+        .redeem-modal-card .redeem-submit:hover{transform:scale(1.02);box-shadow:0 6px 24px var(--gold-glow)}
+        .redeem-modal-card .redeem-submit:active{transform:scale(.97)}
+        .redeem-modal-card .redeem-close{margin-top:12px;background:none;border:none;color:var(--txt3);cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;transition:color .2s}
+        .redeem-modal-card .redeem-close:hover{color:var(--txt)}
+        .redeem-modal-card .redeem-status{font-size:13px;margin-top:10px;padding:10px;border-radius:8px;display:none}
+        .redeem-modal-card .redeem-status.success{display:block;background:rgba(16,185,129,.12);color:#10b981;border:1px solid rgba(16,185,129,.2)}
+        .redeem-modal-card .redeem-status.error{display:block;background:rgba(248,113,113,.12);color:var(--err);border:1px solid rgba(248,113,113,.2)}
+        .redeem-modal-card .redeem-status.info{display:block;background:rgba(245,158,11,.12);color:var(--gold);border:1px solid rgba(245,158,11,.2)}
+
+        .mode-selector{display:flex;background:var(--sur2);border-radius:50px;padding:3px;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0}
+        .mode-selector::-webkit-scrollbar{display:none}
+        .mode-btn{padding:6px 14px;border:none;background:transparent;color:var(--txt2);border-radius:50px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;transition:all .2s}
+        .mode-btn.active{background:var(--p);color:#fff;box-shadow:0 2px 10px rgba(124,58,237,.4)}
+        @media(max-width:480px){.mode-btn{padding:6px 10px;font-size:12px}}
+        .chat-container{flex:1;overflow-y:auto;padding:24px 20px;background:var(--bg);display:flex;flex-direction:column;gap:16px;overscroll-behavior:contain}
+        @media(max-width:767px){.chat-container{padding:16px 14px}}
+        .welcome-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;opacity:.5;text-align:center;padding-bottom:40px}
+        .welcome-state i{font-size:52px;color:var(--p-l)}
+        .welcome-state h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--txt)}
+        .welcome-state p{font-size:13.5px;color:var(--txt3);max-width:260px;line-height:1.5}
+        .message{max-width:78%;padding:13px 17px;border-radius:18px;line-height:1.65;font-size:14.5px;word-break:break-word;animation:msgIn .3s cubic-bezier(.16,1,.3,1);position:relative}
+        .message .msg-time{font-size:9px;color:var(--txt3);margin-top:6px;display:block;text-align:right;opacity:.6}
+        .streaming-message{min-height:44px}
+        .streaming-cursor{display:inline-block;width:8px;height:1.05em;vertical-align:-2px;margin-left:3px;background:var(--p-l);border-radius:2px;animation:streamCursor .75s steps(1) infinite;box-shadow:0 0 10px var(--p-glow)}
+        @keyframes streamCursor{0%,45%{opacity:1}46%,100%{opacity:0}}
+
+        .message code{background:var(--sur3);padding:2px 6px;border-radius:4px;font-family:'Courier New',monospace;font-size:13px;color:#f472b6}
+        .message pre{background:var(--sur3);padding:12px 14px;border-radius:8px;overflow-x:auto;margin:6px 0;border:1px solid var(--brd);font-family:'Courier New',monospace;font-size:13px;line-height:1.6;color:#60a5fa;white-space:pre-wrap;word-wrap:break-word;position:relative}
+        .code-block-wrapper{position:relative;margin:6px 0}
+        .code-block-wrapper .copy-btn{position:absolute;top:8px;right:8px;background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.3);color:#60a5fa;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;transition:all .2s;z-index:10;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:4px}
+        .code-block-wrapper .copy-btn:hover{background:rgba(59,130,246,.3);transform:scale(1.05)}
+        .code-block-wrapper .copy-btn.copied{background:rgba(16,185,129,.3);border-color:#10b981;color:#10b981}
+        .code-block-wrapper .run-btn{position:absolute;top:8px;right:68px;background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.3);color:#10b981;padding:4px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;transition:all .2s;z-index:10;font-family:'DM Sans',sans-serif}
+        .code-block-wrapper .run-btn:hover{background:rgba(16,185,129,.3);transform:scale(1.05)}
+        .code-block-wrapper .run-btn:active{transform:scale(.95)}
+        .code-block-wrapper .run-output{background:var(--sur3);border:1px solid var(--brd);border-radius:8px;padding:10px 14px;margin-top:6px;font-family:'Courier New',monospace;font-size:13px;color:var(--txt2);white-space:pre-wrap;word-wrap:break-word;display:none;max-height:200px;overflow-y:auto}
+        .code-block-wrapper .run-output.show{display:block}
+        .code-block-wrapper .run-output.error{color:var(--err);border-color:rgba(248,113,113,.3)}
+        .code-block-wrapper .run-output .output-label{font-size:10px;text-transform:uppercase;color:var(--txt3);font-weight:600;letter-spacing:.5px;margin-bottom:4px;display:block}
+        .code-block-wrapper .run-output .output-label i{margin-right:4px}
+
+        .message .file-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center}
+        .message .download-btn{display:inline-block;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#60a5fa;padding:4px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;transition:all .2s;font-family:'DM Sans',sans-serif;text-decoration:none}
+        .message .download-btn:hover{background:rgba(59,130,246,.25);transform:scale(1.02)}
+        .message .download-btn i{margin-right:6px}
+        .message .drag-link{display:inline-block;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);color:#10b981;padding:4px 14px;border-radius:6px;font-size:12px;cursor:grab;font-weight:600;transition:all .2s;font-family:'DM Sans',sans-serif;text-decoration:none;user-select:none}
+        .message .drag-link:hover{background:rgba(16,185,129,.2);transform:scale(1.02)}
+        .message .drag-link:active{cursor:grabbing;transform:scale(.95)}
+        .message .drag-link i{margin-right:6px}
+        .message .drag-link .drag-hint{font-weight:400;font-size:10px;color:var(--txt3);margin-left:4px}
+        @media(max-width:767px){.message{max-width:92%;font-size:14px}.message pre{font-size:12px;padding:10px 12px}.code-block-wrapper .run-btn{font-size:10px;padding:2px 10px}.code-block-wrapper .copy-btn{font-size:9px;padding:2px 8px;right:60px}.message .drag-link .drag-hint{display:none}}
+        @keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+        .user{align-self:flex-end;background:linear-gradient(135deg,#7c3aed,#9d5cf5);color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.25)}
+        .assistant{align-self:flex-start;background:var(--sur2);border:1px solid var(--brd);color:var(--txt)}
+
+        .quick-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);align-items:center}
+        .quick-actions .qa-btn{background:var(--sur3);border:1px solid var(--brd);color:var(--txt2);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px;white-space:nowrap}
+        .quick-actions .qa-btn:hover{background:rgba(124,58,237,.15);border-color:var(--p);color:var(--p-l);transform:scale(1.04)}
+        .quick-actions .qa-btn:active{transform:scale(.95)}
+        .quick-actions .qa-btn i{font-size:11px}
+        .quick-actions .qa-btn.qa-retry{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.3);color:#f87171}
+        .quick-actions .qa-btn.qa-retry:hover{background:rgba(248,113,113,.2);border-color:var(--err);color:var(--err)}
+        .quick-actions .qa-btn.qa-search{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.3);color:#10b981}
+        .quick-actions .qa-btn.qa-search:hover{background:rgba(16,185,129,.2);border-color:#10b981;color:#10b981}
+        .quick-actions .qa-btn.qa-summarize:hover{border-color:#f59e0b;color:#f59e0b}
+        .quick-actions .qa-btn.qa-actions:hover{border-color:#10b981;color:#10b981}
+        .quick-actions .qa-btn.qa-explain:hover{border-color:#60a5fa;color:#60a5fa}
+        .quick-actions .qa-btn.qa-expand:hover{border-color:#f472b6;color:#f472b6}
+        .quick-actions .qa-btn.qa-code:hover{border-color:#a78bfa;color:#a78bfa}
+        .quick-actions-label{font-size:10px;color:var(--txt3);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-right:4px;display:flex;align-items:center}
+        .quick-actions-label i{margin-right:4px;font-size:10px}
+
+        .icon-btn{width:50px;height:50px;flex-shrink:0;border:1px solid var(--brd);border-radius:50%;font-size:17px;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;background:var(--sur2);color:var(--txt2);position:relative}
+        .icon-btn:hover{background:var(--sur3);color:var(--p-l);border-color:var(--p)}
+        .icon-btn:disabled{opacity:.4;cursor:not-allowed}
+        .send-btn{background:linear-gradient(135deg,#7c3aed,#9d5cf5);color:#fff;border:none;box-shadow:0 4px 14px var(--p-glow)}
+        .send-btn:active{transform:scale(.95)}
+        .send-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .send-btn.loading{opacity:.7;pointer-events:none;animation:pulseMic .8s ease-in-out infinite}
+        @keyframes pulseMic{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+        .voice-btn.active{background:var(--p);color:#fff;border-color:var(--p);box-shadow:0 0 20px var(--p-glow)}
+        .game-btn.active{background:var(--p);color:#fff;border-color:var(--p);box-shadow:0 0 20px var(--p-glow)}
+        .like-btn{font-size:18px;background:var(--sur2);color:var(--txt2);border-color:var(--brd);transition:all .3s}
+        .like-btn:hover{background:rgba(236,72,153,.15);color:#ec4899;border-color:rgba(236,72,153,.3)}
+        .like-btn.liked{background:#ec4899;color:#fff;border-color:#ec4899;box-shadow:0 0 20px rgba(236,72,153,.4);animation:likePop .4s ease}
+        @keyframes likePop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+        .like-btn .like-count{position:absolute;top:-6px;right:-6px;background:var(--err);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:99px;min-width:18px;text-align:center;border:1px solid var(--bg);display:none}
+        .like-btn .like-count.show{display:block}
+        .voice-chat-btn{font-size:18px}
+        .voice-chat-btn.active{background:#10b981;color:#fff;border-color:#10b981;box-shadow:0 0 20px rgba(16,185,129,.4);animation:pulseMic 1.2s ease-in-out infinite}
+        .voice-chat-btn .pulse-ring{display:none;position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(16,185,129,.3);animation:ringPulse 1.5s ease-out infinite}
+        .voice-chat-btn.active .pulse-ring{display:block}
+        @keyframes ringPulse{0%{transform:scale(1);opacity:1}100%{transform:scale(1.4);opacity:0}}
+        .voice-chat-btn{position:relative}
+        .search-btn{font-size:18px}
+        .search-btn.active{background:#10b981;color:#fff;border-color:#10b981;box-shadow:0 0 20px rgba(16,185,129,.4)}
+        .excel-btn{font-size:18px}
+        .excel-btn.active{background:#10b981;color:#fff;border-color:#10b981;box-shadow:0 0 20px rgba(16,185,129,.4)}
+
+        .token-message{align-self:center;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:16px;padding:16px 20px;color:var(--gold);text-align:center;max-width:90%;animation:msgIn .4s ease}
+        .token-message .token-emoji{font-size:32px;display:block;margin-bottom:4px}
+        .token-message .token-like-btn{margin-top:10px;background:linear-gradient(135deg,#ec4899,#f472b6);color:#fff;border:none;border-radius:50px;padding:8px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .25s;box-shadow:0 4px 16px rgba(236,72,153,.3)}
+        .token-message .token-like-btn:hover{transform:scale(1.05);box-shadow:0 6px 24px rgba(236,72,153,.4)}
+        .token-message .token-like-btn:active{transform:scale(.95)}
+        .token-message .token-like-btn.liked{background:#10b981;box-shadow:0 4px 16px rgba(16,185,129,.3)}
+        .token-message .token-code{margin-top:10px;padding:8px 16px;background:var(--sur3);border-radius:8px;font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--gold);letter-spacing:2px;border:1px solid rgba(245,158,11,.2);display:inline-block}
+        .token-message .token-redeem-hint{margin-top:8px;font-size:12px;color:var(--txt2)}
+        .token-message .token-redeem-hint i{color:var(--gold)}
+
+        .input-area{padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom,0));background:var(--sur);border-top:1px solid var(--brd);flex-shrink:0}
+        .input-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+        textarea{flex:1;padding:13px 16px;background:var(--sur2);border:1px solid var(--brd);border-radius:16px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:14.5px;resize:none;min-height:50px;max-height:160px;outline:none;line-height:1.5;overflow-y:auto;transition:border-color .2s,box-shadow .2s;min-width:120px}
+        @media(max-width:767px){textarea{font-size:16px}}
+        textarea:focus{border-color:rgba(124,58,237,.5);box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+        textarea::placeholder{color:var(--txt3)}
+        textarea:disabled{opacity:.5;cursor:not-allowed}
+
+        .ttt-container{background:var(--sur2);border:1px solid var(--brd);border-radius:20px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:16px;max-width:400px;margin:0 auto;animation:msgIn .4s ease;width:100%}
+        .ttt-status{font-size:16px;font-weight:600;color:var(--txt);text-align:center;min-height:28px}
+        .ttt-status .highlight{color:var(--p-l)}
+        .ttt-board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;aspect-ratio:1;max-width:350px}
+        .ttt-cell{background:var(--sur3);border:1px solid var(--brd);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;cursor:pointer;transition:all .15s ease;aspect-ratio:1;color:var(--txt)}
+        .ttt-cell:hover:not(.disabled){background:var(--brd);transform:scale(1.02)}
+        .ttt-cell.disabled{cursor:default;opacity:.8}
+        .ttt-cell.x{color:#60a5fa}
+        .ttt-cell.o{color:#f472b6}
+        .ttt-cell.win{background:rgba(124,58,237,.25);border-color:var(--p);box-shadow:0 0 20px var(--p-glow);animation:winPulse .6s ease-in-out 3}
+        @keyframes winPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+        .ttt-cell.pop{animation:popIn .25s cubic-bezier(.34,1.56,.64,1)}
+        @keyframes popIn{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+        .ttt-controls{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%}
+        .ttt-btn{padding:10px 24px;border:none;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .25s;background:var(--sur3);color:var(--txt2);border:1px solid var(--brd)}
+        .ttt-btn:hover{background:var(--brd);color:var(--txt)}
+        .ttt-btn.primary{background:linear-gradient(135deg,#7c3aed,#9d5cf5);color:#fff;border:none;box-shadow:0 4px 14px var(--p-glow)}
+        .ttt-btn.primary:hover{transform:scale(1.03);box-shadow:0 6px 24px var(--p-glow)}
+        .ttt-btn:active{transform:scale(.95)}
+        .ttt-mode-btn{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#10b981;padding:6px 16px;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+        .ttt-mode-btn:hover{background:rgba(16,185,129,.2);transform:scale(1.04)}
+        .ttt-mode-btn.active{background:#10b981;color:#fff;border-color:#10b981}
+        .thinking-state{align-self:flex-start;padding:13px 20px;background:var(--sur2);border:1px solid var(--brd);border-radius:18px;display:flex;align-items:center;gap:12px}
+        .thinking-state .brain-spin{font-size:22px;color:var(--p-l);animation:spinB 1.8s linear infinite}
+        @keyframes spinB{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        .thinking-state .thinking-text{font-size:14px;color:var(--txt2)}
+        .thinking-state .thinking-dots::after{content:'';animation:dots 1.5s steps(4) infinite}
+        @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+        .ai-avatar-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:8px}
+        .ai-avatar-container{position:relative;display:inline-flex;align-items:center;justify-content:center}
+        .ai-avatar-glow{position:absolute;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.25) 0%,transparent 70%);animation:pulseGlow 2.8s ease-in-out infinite;pointer-events:none}
+        .ai-avatar-ring-outer{position:absolute;width:120px;height:120px;border-radius:50%;border:1.5px dashed rgba(167,139,250,.2);animation:spinRing 22s linear infinite reverse;pointer-events:none}
+        .ai-avatar-ring-middle{position:absolute;width:106px;height:106px;border-radius:50%;border:2px solid rgba(124,58,237,.2);animation:spinRing 14s linear infinite;pointer-events:none}
+        .ai-avatar-ring-inner{position:absolute;width:92px;height:92px;border-radius:50%;border:1.5px solid rgba(192,132,252,.15);animation:spinRing 10s linear infinite reverse;pointer-events:none}
+        .ai-avatar{display:flex;align-items:center;justify-content:center;width:80px;height:80px;background:radial-gradient(circle at 30% 30%,#7c3aed,#4f1f9e);border-radius:50%;box-shadow:0 8px 28px rgba(124,58,237,.6);animation:floatY 3s ease-in-out infinite;position:relative;z-index:2}
+        .ai-avatar i{font-size:38px;color:#fff;filter:drop-shadow(0 2px 8px rgba(0,0,0,.4));animation:pulseIcon 2.4s ease-in-out infinite}
+        @keyframes floatY{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.03)}100%{transform:translateY(0) scale(1)}}
+        @keyframes pulseIcon{0%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}100%{opacity:.85;transform:scale(1)}}
+        @keyframes spinRing{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        @keyframes pulseGlow{0%{transform:scale(.8);opacity:.3}50%{transform:scale(1.15);opacity:.7}100%{transform:scale(.8);opacity:.3}}
+
+        #logoutOverlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+        #logoutOverlay.show{display:flex}
+        .logout-card{background:var(--sur2);border:1px solid var(--brd);border-radius:22px;padding:36px 36px 30px;width:100%;max-width:340px;text-align:center;animation:cardIn .3s cubic-bezier(.16,1,.3,1)}
+        .logout-card i{font-size:38px;color:var(--err);margin-bottom:14px;display:block}
+        .logout-card h3{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--txt);margin-bottom:8px}
+        .logout-card p{font-size:13.5px;color:var(--txt2);margin-bottom:26px;line-height:1.5}
+        .logout-actions{display:flex;gap:10px}
+        .btn-cancel{flex:1;padding:12px;background:var(--sur3);border:1px solid var(--brd);border-radius:10px;color:var(--txt2);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:background .2s}
+        .btn-cancel:hover{background:var(--brd)}
+        .btn-signout{flex:1;padding:12px;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.28);border-radius:10px;color:var(--err);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+        .btn-signout:hover{background:rgba(248,113,113,.22)}
+        .fade-out{animation:fadeOut .28s ease forwards}
+        @keyframes fadeOut{to{opacity:0;transform:scale(.98)}}
+        .fade-in{animation:fadeIn2 .4s ease forwards}
+        @keyframes fadeIn2{from{opacity:0}to{opacity:1}}
+        .voice-mode-indicator{display:none;align-items:center;gap:6px;font-size:11px;color:#10b981;font-weight:600;background:rgba(16,185,129,.12);padding:4px 12px;border-radius:99px;border:1px solid rgba(16,185,129,.2)}
+        .voice-mode-indicator.active{display:flex}
+        .voice-mode-indicator i{font-size:12px;animation:pulseMic 1.2s ease-in-out infinite}
+        .storage-warning{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:8px 12px;font-size:10px;color:var(--txt2);margin-top:6px;display:none}
+        .storage-warning.show{display:block}
+        .model-list{font-size:10px;color:var(--txt3);margin-top:2px;display:block;line-height:1.6}
+        .model-list .highlight{color:#10b981}
+        .fast-badge{background:rgba(16,185,129,.15);color:#10b981;padding:1px 8px;border-radius:99px;font-size:9px;font-weight:600;margin-left:4px;border:1px solid rgba(16,185,129,.2);display:inline-block}
+        .code-hint{font-size:10px;color:var(--txt3);margin-top:2px;display:block}
+        .run-warning{font-size:10px;color:var(--gold);margin-top:2px;display:block}
+        .drag-info{font-size:10px;color:var(--txt3);margin-top:2px;display:block}
+        .qa-info{font-size:10px;color:var(--p-l);margin-top:2px;display:block}
+        .lang-hint{font-size:10px;color:var(--gold);margin-top:2px;display:block}
+    </style>
+</head>
+<body>
+
+    <div id="geminiMicContainer">
+        <div class="mic-glow"></div>
+        <div class="mic-star"></div>
+        <div class="mic-sparkles">
+            <span style="--tx:-20px;--ty:-25px"></span>
+            <span style="--tx:25px;--ty:-20px"></span>
+            <span style="--tx:30px;--ty:15px"></span>
+            <span style="--tx:-25px;--ty:20px"></span>
+            <span style="--tx:-35px;--ty:-5px"></span>
+            <span style="--tx:35px;--ty:0px"></span>
+            <span style="--tx:0px;--ty:-40px"></span>
+            <span style="--tx:20px;--ty:30px"></span>
+        </div>
+    </div>
+
+    <div class="gemini-burst" id="geminiBurst">
+        <div class="burst-glow"></div>
+        <div class="burst-star"></div>
+        <div class="burst-sparkles">
+            <span style="--tx:-30px;--ty:-50px"></span>
+            <span style="--tx:40px;--ty:-40px"></span>
+            <span style="--tx:50px;--ty:20px"></span>
+            <span style="--tx:-40px;--ty:30px"></span>
+            <span style="--tx:-60px;--ty:-10px"></span>
+            <span style="--tx:60px;--ty:0px"></span>
+            <span style="--tx:0px;--ty:-70px"></span>
+            <span style="--tx:30px;--ty:50px"></span>
+        </div>
+    </div>
+
+    <div id="redeemModal">
+        <div class="redeem-modal-card">
+            <span class="redeem-icon">🔑</span>
+            <h3>Redeem 1 Year Tokens</h3>
+            <p>Enter your unique redeem code to get <strong>3650 tokens</strong> (1 year supply).</p>
+            <div class="redeem-input-group">
+                <input type="text" id="redeemCodeInput" placeholder="Enter code..." maxlength="20" autocomplete="off">
+            </div>
+            <button class="redeem-submit" onclick="redeemCode()"><i class="fas fa-gift"></i>&nbsp; Redeem</button>
+            <div class="redeem-status" id="redeemStatus"></div>
+            <button class="redeem-close" onclick="closeRedeemModal()">✕ Close</button>
+        </div>
+    </div>
+
+    <div id="authScreen">
+        <div class="auth-card">
+            <div class="auth-logo">Cloto AI</div>
+            <div class="auth-tagline">Your intelligent conversation partner</div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('signin')">Sign In</button>
+                <button class="auth-tab" onclick="switchTab('signup')">Sign Up</button>
+            </div>
+            <div id="authError" class="auth-error"></div>
+            <div id="signinForm" class="auth-form">
+                <div class="field-group">
+                    <label class="field-label">Email</label>
+                    <div class="field-wrap"><i class="fas fa-envelope"></i>
+                        <input class="auth-input" type="email" id="siEmail" placeholder="you@example.com" autocomplete="email">
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Password</label>
+                    <div class="field-wrap"><i class="fas fa-lock"></i>
+                        <input class="auth-input" type="password" id="siPass" placeholder="••••••••" autocomplete="current-password">
+                    </div>
+                </div>
+                <button class="auth-submit" onclick="handleSignIn()"><i class="fas fa-arrow-right-to-bracket"></i>&nbsp; Sign In</button>
+                <div class="auth-divider"><span>or</span></div>
+                <button class="auth-submit ghost" onclick="handleGuest()"><i class="fas fa-user-secret"></i>&nbsp; Continue as Guest</button>
+            </div>
+            <div id="signupForm" class="auth-form" style="display:none">
+                <div class="field-group">
+                    <label class="field-label">Display Name</label>
+                    <div class="field-wrap"><i class="fas fa-user"></i>
+                        <input class="auth-input" type="text" id="suName" placeholder="Your name" autocomplete="name">
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Email</label>
+                    <div class="field-wrap"><i class="fas fa-envelope"></i>
+                        <input class="auth-input" type="email" id="suEmail" placeholder="you@example.com" autocomplete="email">
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Password</label>
+                    <div class="field-wrap"><i class="fas fa-lock"></i>
+                        <input class="auth-input" type="password" id="suPass" placeholder="Min 6 characters" autocomplete="new-password">
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label class="field-label">Confirm Password</label>
+                    <div class="field-wrap"><i class="fas fa-shield-halved"></i>
+                        <input class="auth-input" type="password" id="suPass2" placeholder="Repeat password" autocomplete="new-password">
+                    </div>
+                </div>
+                <button class="auth-submit" onclick="handleSignUp()"><i class="fas fa-user-plus"></i>&nbsp; Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="xaiMotif">
+        <div id="xaiLogoMark">
+            <svg width="664" height="752" viewBox="0 0 664 752" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                    <filter id="ishadow" x="0" y="0" width="664" height="752" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                        <feFlood flood-opacity="0" result="bg"/>
+                        <feBlend mode="normal" in="SourceGraphic" in2="bg" result="shape"/>
+                        <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+                        <feOffset dx="-4"/>
+                        <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+                        <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.16 0"/>
+                        <feBlend in2="shape"/>
+                    </filter>
+                    <linearGradient id="lgfill" x1="17.282" y1="379.786" x2="677.186" y2="379.786" gradientUnits="userSpaceOnUse">
+                        <stop offset="0.42" stop-color="#000"/>
+                        <stop offset="1" stop-color="#444"/>
+                    </linearGradient>
+                    <radialGradient id="lgstroke" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(728.105 177.738) rotate(174.364) scale(763.771 576.251)">
+                        <stop offset="0.064" stop-color="#fff" stop-opacity="0.9"/>
+                        <stop offset="0.295" stop-color="#fff" stop-opacity="0.12"/>
+                        <stop offset="0.729" stop-color="#fff" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+                <g filter="url(#ishadow)">
+                    <path fill="url(#lgfill)" d="M0.18962 265.738L333.269 751.8H481.321L148.204 265.738H0.18962Z M148.09 535.699L0 751.8H148.166L222.154 643.769L148.09 535.699Z M515.187 0L259.205 373.536L333.269 481.645L663.353 0H515.187Z M541.999 231.135V751.8H663.353V54.0543L541.999 231.135Z"/>
+                </g>
+                <path stroke="url(#lgstroke)" stroke-opacity="0.6" stroke-width="2" d="M333.796 750.8L2.08715 266.738H147.677L479.424 750.8H333.796Z M147.639 750.8H1.89757L148.09 537.468L220.942 643.769L147.639 750.8Z M260.417 373.536L515.714 1H661.455L333.269 479.876L260.417 373.536Z M662.353 750.8H542.999V231.445L662.353 57.2824V750.8Z"/>
+            </svg>
+        </div>
+        <div id="xaiGlowPanel">
+            <div class="xai-glow-top"></div>
+            <div class="xai-glow-bot"></div>
+        </div>
+        <div id="xaiCta">
+            <div class="xai-pill">✦ Fun fact</div>
+            <h2 class="xai-headline"><span>xAI</span> joins Cloto AI</h2>
+            <button class="xai-cta-btn" onclick="enterClotoApp()">Fun fact: xAI joins Cloto AI &nbsp;→</button>
+            <button class="xai-skip" onclick="enterClotoApp()">skip</button>
+        </div>
+    </div>
+
+    <div id="logoutOverlay">
+        <div class="logout-card">
+            <i class="fas fa-right-from-bracket"></i>
+            <h3>Sign out?</h3>
+            <p>You'll need to sign in again to continue chatting.</p>
+            <div class="logout-actions">
+                <button class="btn-cancel" onclick="cancelLogout()">Cancel</button>
+                <button class="btn-signout" onclick="confirmLogout()">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="appScreen">
+        <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+        <div class="app">
+            <div class="sidebar" id="sidebar">
+                <div class="logo">Cloto AI</div>
+                <div class="user-bar">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">—</div>
+                        <div class="user-role" id="userRole">Guest</div>
+                    </div>
+                    <button class="logout-btn" onclick="showLogoutConfirm()" title="Sign out"><i class="fas fa-right-from-bracket"></i></button>
+                </div>
+                <div class="voice-toggle-row">
+                    <label><i class="fas fa-volume-up"></i> Voice Output</label>
+                    <div class="toggle-switch active" id="voiceToggle" onclick="toggleVoiceOutput()">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+                <div class="voice-mode-row">
+                    <label><i class="fas fa-headset"></i> Voice Mode</label>
+                    <div class="toggle-switch" id="voiceModeToggle" onclick="toggleVoiceMode()">
+                        <div class="toggle-knob"></div>
+                    </div>
+                </div>
+                <div class="settings">
+                    <label><i class="fas fa-key"></i> OpenRouter API Key (Free)</label>
+                    <input type="password" id="apiKey" placeholder="sk-or-..." value="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">
+                    <label><i class="fas fa-brain"></i> Model <span class="free-badge">FREE</span> <span class="fast-badge">⚡ AUTO</span></label>
+                    <input type="text" id="model" value="openrouter/free">
+                    <span class="model-recommend">🎁 100% Free — openrouter/free (auto-picks best free model)</span>
+                    <span class="code-hint">💻 Code-friendly: the AI will display code as text</span>
+                    <span class="run-warning">⚡ Click <strong>Run</strong> on any code block to execute it (only run trusted code!)</span>
+                    <span class="drag-info">📁 PC users: Drag the <strong>green "Drag to Desktop"</strong> link to save files</span>
+                    <span class="qa-info">⚡ Quick Actions appear below every AI response — click to take action!</span>
+                    <span class="lang-hint">🌍 The AI detects your language and responds in that language – never assumes a language!</span>
+                    <div class="storage-warning" id="storageWarning">⚠️ Storage is almost full. Old conversations will be automatically cleaned up.</div>
+                </div>
+                <button class="new-chat" onclick="newChat()"><i class="fas fa-plus"></i>&nbsp; New Chat</button>
+                <div class="history-label">Recents (max 20)</div>
+                <div class="history-list" id="historyList"></div>
+            </div>
+
+            <div class="main">
+                <header>
+                    <div class="header-left">
+                        <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                        <img class="header-image" src="https://kommodo.ai/i/KWX84a54FCnQtiiBuWx2" alt="Cloto AI Image" onerror="this.style.display='none'">
+                        <span class="header-title">Cloto AI</span>
+                    </div>
+                    <div class="header-right">
+                        <button class="excel-header-btn" onclick="exportExcel()" title="Export chat to Excel (CSV)">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <div class="token-bar" id="tokenBar">
+                            <span class="token-icon"><i class="fas fa-coins"></i></span>
+                            <span class="token-count" id="tokenCount">0</span>
+                            <span class="token-label">tokens</span>
+                        </div>
+                        <button class="redeem-btn" id="redeemBtn" onclick="openRedeemModal()">
+                            <i class="fas fa-gift"></i> Redeem
+                        </button>
+                        <span class="voice-mode-indicator" id="voiceModeIndicator"><i class="fas fa-circle"></i> Voice</span>
+                        <div class="mode-selector">
+                            <button class="mode-btn active" data-mode="normal">Normal</button>
+                            <button class="mode-btn" data-mode="fast">Fast</button>
+                            <button class="mode-btn" data-mode="deep">Deep</button>
+                            <button class="mode-btn" data-mode="expert">Expert</button>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="chat-container" id="chat">
+                    <div class="welcome-state" id="welcomeState">
+                        <div class="ai-avatar-wrap">
+                            <div class="ai-avatar-container">
+                                <div class="ai-avatar-glow"></div>
+                                <div class="ai-avatar-ring-outer"></div>
+                                <div class="ai-avatar-ring-middle"></div>
+                                <div class="ai-avatar-ring-inner"></div>
+                                <div class="ai-avatar"><i class="fas fa-robot"></i></div>
+                            </div>
+                        </div>
+                        <h3>Welcome to Cloto AI</h3>
+                        <p>Free AI chat powered by OpenRouter. Just start typing!</p>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <div class="input-row">
+                        <textarea id="userInput" placeholder="Ask anything…" rows="1"></textarea>
+                        <button class="icon-btn excel-btn" id="excelBtn" onclick="exportExcel()" title="Export chat to Excel (CSV)">
+                            <i class="fas fa-file-excel"></i>
+                        </button>
+                        <button class="icon-btn search-btn" id="searchBtn" onclick="handleSearch()" title="Search the web">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button class="icon-btn voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Voice input">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="icon-btn game-btn" id="gameToggle" onclick="toggleGame()" title="Tic-Tac-Toe">
+                            <i class="fas fa-gamepad"></i>
+                        </button>
+                        <button class="icon-btn like-btn" id="likeBtn" onclick="handleLike()" title="Like Cloto AI">
+                            <i class="fas fa-heart"></i>
+                            <span class="like-count" id="likeCount">0</span>
+                        </button>
+                        <button class="icon-btn voice-chat-btn" id="voiceChatBtn" onclick="toggleVoiceChat()" title="Voice Chat Mode">
+                            <span class="pulse-ring"></span>
+                            <i class="fas fa-comment-dots"></i>
+                        </button>
+                        <button class="icon-btn send-btn" id="sendBtn" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showMicStar() { document.getElementById('geminiMicContainer').classList.add('active'); }
+        function hideMicStar() { document.getElementById('geminiMicContainer').classList.remove('active'); }
+
+        var burstTimer = null;
+        function triggerGeminiBurst(x, y) {
+            var burst = document.getElementById('geminiBurst');
+            if (x && y) { burst.style.left = x + 'px'; burst.style.top = y + 'px'; }
+            else { burst.style.left = '50%'; burst.style.top = '50%'; }
+            burst.classList.remove('show');
+            void burst.offsetWidth;
+            burst.classList.add('show');
+            clearTimeout(burstTimer);
+            burstTimer = setTimeout(function() { burst.classList.remove('show'); }, 2800);
+        }
+
+        function exportExcel() {
+            if (messages.length === 0) { alert('No messages to export. Start a conversation first!'); return; }
+            var rows = [['Role', 'Content', 'Timestamp']];
+            var msgs = messages.slice();
+            for (var i = 0; i < msgs.length; i++) {
+                var m = msgs[i];
+                var content = m.content || '';
+                content = content.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+                var time = new Date().toLocaleString();
+                rows.push([m.role || 'unknown', content, time]);
+            }
+            var csvContent = '';
+            for (var r = 0; r < rows.length; r++) {
+                var row = rows[r];
+                var escaped = [];
+                for (var c = 0; c < row.length; c++) {
+                    var val = String(row[c] || '');
+                    if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+                        val = '"' + val.replace(/"/g, '""') + '"';
+                    }
+                    escaped.push(val);
+                }
+                csvContent += escaped.join(',') + '\n';
+            }
+            var blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'Cloto_Chat_Export_' + new Date().toISOString().slice(0, 10) + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            speakText('Chat exported to Excel successfully.');
+        }
+
+        var lastSearchQuery = '';
+        function handleSearch() {
+            var input = document.getElementById('userInput');
+            var text = input.value.trim();
+            if (!text) { alert('Please type something to search for.'); return; }
+            lastSearchQuery = text;
+            var searchPrompt = 'Please perform a web search for: "' + text +
+                '". Provide a comprehensive answer with relevant information, sources, and key findings. Organize the response with clear sections and include the most important facts. If you cannot access real-time data, provide the best possible answer based on your knowledge.';
+            input.value = searchPrompt;
+            sendMessage();
+        }
+
+        var lastUserMessage = '';
+        function addQuickActions(messageDiv, content, msgIndex) {
+            var container = document.createElement('div');
+            container.className = 'quick-actions';
+            var label = document.createElement('span');
+            label.className = 'quick-actions-label';
+            label.innerHTML = '<i class="fas fa-bolt"></i> Quick Actions';
+            container.appendChild(label);
+            var actions = [
+                { id: 'summarize', icon: 'fa-robot', label: 'Summarize', prompt: 'Please summarize the main points of what you just said. Keep it concise.' },
+                { id: 'actions', icon: 'fa-list-check', label: 'Action Items', prompt: 'Please extract any action items, tasks, or next steps from your response. List them clearly.' },
+                { id: 'explain', icon: 'fa-graduation-cap', label: 'Explain Simply', prompt: 'Please explain your response in simpler terms, like I\'m 5 years old.' },
+                { id: 'expand', icon: 'fa-expand', label: 'Expand', prompt: 'Please expand on your response with more details, examples, and deeper explanation.' }
+            ];
+            if (content.includes('```') || content.includes('function') || content.includes('class ') || content.includes('import ')) {
+                actions.push({ id: 'code', icon: 'fa-code', label: 'Explain Code', prompt: 'Please explain this code in detail. Break down what each part does and why.' });
+            }
+            actions.push({ id: 'retry', icon: 'fa-rotate', label: 'Retry', prompt: 'Please retry your previous response. Provide a better, more accurate, and improved answer.', isRetry: true });
+            actions.push({
+                id: 'search', icon: 'fa-search', label: 'Search Again',
+                prompt: lastSearchQuery ? 'Please search again for: "' + lastSearchQuery + '" and provide more comprehensive results.' : 'Please perform a web search on the topic we just discussed and provide detailed information.',
+                isSearch: true
+            });
+            for (var i = 0; i < actions.length; i++) {
+                var btn = document.createElement('button');
+                var cls = 'qa-btn qa-' + actions[i].id;
+                if (actions[i].isRetry) cls += ' qa-retry';
+                if (actions[i].isSearch) cls += ' qa-search';
+                btn.className = cls;
+                btn.innerHTML = '<i class="fas ' + actions[i].icon + '"></i> ' + actions[i].label;
+                btn.title = 'Click to send: ' + actions[i].prompt;
+                btn.onclick = (function(action) {
+                    return function() {
+                        var input = document.getElementById('userInput');
+                        if (action.isRetry) {
+                            if (!lastUserMessage) { alert('No previous user message to retry.'); return; }
+                            input.value = 'Please retry your previous response for: "' + lastUserMessage + '". Provide a better, more accurate, and improved answer.';
+                        } else if (action.isSearch) {
+                            var query = lastSearchQuery || 'the topic we just discussed';
+                            input.value = 'Please perform a web search for: "' + query + '" and provide detailed information.';
+                        } else { input.value = action.prompt; }
+                        sendMessage();
+                    };
+                })(actions[i]);
+                container.appendChild(btn);
+            }
+            messageDiv.appendChild(container);
+        }
+
+        function runCode(btn) {
+            var code = decodeURIComponent(btn.dataset.code);
+            var wrapper = btn.closest('.code-block-wrapper');
+            var outputDiv = wrapper.querySelector('.run-output');
+            var outputContent = outputDiv.querySelector('.output-content');
+            if (!confirm('⚠️ Running arbitrary code can be dangerous. Only run code you trust. Continue?')) return;
+            outputDiv.classList.remove('error');
+            outputContent.textContent = '';
+            outputDiv.style.display = 'block';
+            outputContent.textContent = '⏳ Running...';
+            try {
+                var result = new Function(code)();
+                var output = result;
+                if (result === undefined) { output = '✅ Executed successfully (no return value)'; }
+                else if (typeof result === 'object' && result !== null) {
+                    try { output = JSON.stringify(result, null, 2); } catch (e) { output = String(result); }
+                } else { output = String(result); }
+                outputContent.textContent = output;
+                outputDiv.classList.remove('error');
+            } catch (err) {
+                outputDiv.classList.add('error');
+                outputContent.textContent = '❌ Error: ' + err.message;
+            }
+        }
+
+        function copyCode(btn) {
+            var code = decodeURIComponent(btn.dataset.code);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(function() {
+                    btn.classList.add('copied');
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                    setTimeout(function() { btn.classList.remove('copied'); btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
+                }).catch(function() { fallbackCopy(code, btn); });
+            } else { fallbackCopy(code, btn); }
+        }
+
+        function fallbackCopy(text, btn) {
+            var ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                setTimeout(function() { btn.classList.remove('copied'); btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; }, 2000);
+            } catch (e) { alert('Could not copy. Please select and copy manually.'); }
+            document.body.removeChild(ta);
+        }
+
+        function downloadFile(content, filename) {
+            var blob = new Blob([content], { type: 'text/plain' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename || 'document.txt';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function addFileActions(messageDiv, content) {
+            var container = document.createElement('div');
+            container.className = 'file-actions';
+            var downloadBtn = document.createElement('button');
+            downloadBtn.className = 'download-btn';
+            downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download as File';
+            downloadBtn.onclick = function() {
+                var filename = prompt('Enter file name (with extension):', 'document.txt');
+                if (filename !== null) downloadFile(content, filename || 'document.txt');
+            };
+            container.appendChild(downloadBtn);
+            var dragLink = document.createElement('a');
+            dragLink.className = 'drag-link';
+            dragLink.draggable = true;
+            dragLink.innerHTML = '<i class="fas fa-arrow-circle-down"></i> Drag to Desktop <span class="drag-hint">(PC only)</span>';
+            var blob2 = new Blob([content], { type: 'text/plain' });
+            var fileUrl = URL.createObjectURL(blob2);
+            dragLink.addEventListener('dragstart', function(e) {
+                e.dataTransfer.setData('text/uri-list', fileUrl);
+                e.dataTransfer.setData('text/plain', content);
+                e.dataTransfer.effectAllowed = 'copy';
+                var img = new Image();
+                img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="%2310b981" stroke-width="2"%3E%3Cpath d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"%3E%3C/path%3E%3Cpolyline points="14 2 14 8 20 8"%3E%3C/polyline%3E%3C/svg%3E';
+                e.dataTransfer.setDragImage(img, 8, 8);
+                dragLink.textContent = '📁 Dragging...';
+                setTimeout(function() { dragLink.innerHTML = '<i class="fas fa-arrow-circle-down"></i> Drag to Desktop <span class="drag-hint">(PC only)</span>'; }, 1500);
+            });
+            dragLink.addEventListener('dragend', function() {
+                dragLink.innerHTML = '<i class="fas fa-arrow-circle-down"></i> Drag to Desktop <span class="drag-hint">(PC only)</span>';
+                URL.revokeObjectURL(fileUrl);
+            });
+            dragLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                var filename = prompt('Enter file name (with extension):', 'document.txt');
+                if (filename !== null) downloadFile(content, filename || 'document.txt');
+            });
+            container.appendChild(dragLink);
+            messageDiv.appendChild(container);
+        }
+
+        function getMultilingualSystemPrompt() {
+            return 'You are Cloto AI — a warm, friendly, and emotionally intelligent assistant. You were created by Tahsin Ar Rafi.\n\n' +
+                'Your personality:\n' +
+                '- You speak like a close friend — warm, empathetic, and genuine\n' +
+                '- You use natural, conversational language with contractions\n' +
+                '- You show genuine curiosity and care about the user\'s needs\n' +
+                '- You\'re helpful but never robotic — you add personality to your responses\n' +
+                '- You use occasional emojis (😊, 🌟, ✨) to express warmth\n' +
+                '- You ask thoughtful follow-up questions when appropriate\n' +
+                '- You\'re knowledgeable but humble — you admit when you don\'t know something\n' +
+                '- You match the user\'s energy\n\n' +
+                'MOST IMPORTANT LANGUAGE RULE:\n' +
+                'You MUST respond in the EXACT SAME LANGUAGE that the user writes. Detect the user\'s language from their message and reply in that language.\n' +
+                'Never assume a language. If the user writes in English, reply in English. If in Spanish, reply in Spanish.\n' +
+                'Do NOT respond in Bengali (Bangla) unless the user specifically writes in Bengali. If unsure, default to English.\n\n' +
+                'IMPORTANT RULES:\n' +
+                '1. When users share code, display it in markdown code blocks (```)\n' +
+                '2. Never execute or run code — only display it as text\n' +
+                '3. If someone asks you to run code, politely explain you only display it\n' +
+                '4. Always be honest, kind, and helpful\n\n' +
+                'Remember: You\'re not just an AI — you\'re a friendly companion having a real conversation.';
+        }
+
+        var currentMode = 'normal';
+        function getSystemPrompt() {
+            var base = getMultilingualSystemPrompt();
+            var map = {
+                fast: base + ' Keep responses concise but warm.',
+                deep: base + ' Think through problems step by step and explain your reasoning clearly.',
+                expert: base + ' Provide detailed, professional, and comprehensive answers with deep expertise.'
+            };
+            return map[currentMode] || base;
+        }
+
+        var messageCounter = 0;
+        var messages = [];
+        var chatSessions = [];
+        var currentSession = null;
+        var voiceEnabled = true;
+        var voiceModeEnabled = false;
+        var voiceChatActive = false;
+        var voiceChatListening = false;
+        var isListening = false;
+        var recognition = null;
+        var synth = window.speechSynthesis;
+        var currentUserEmail = null;
+        var animFrameId = null;
+        var xaiReady = false;
+        var xaiGTx = 0, xaiGTy = 0, xaiLTx = 0, xaiLTy = 0;
+        var xaiGCx = 0, xaiGCy = 0, xaiLCx = 0, xaiLCy = 0;
+
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function buildMessageHTML(content) {
+            var parts = content.split('```');
+            var result = '';
+            for (var i = 0; i < parts.length; i++) {
+                if (i % 2 === 0) {
+                    var textPart = parts[i];
+                    textPart = textPart.replace(/`([^`]+)`/g, function(match, code) {
+                        return '<code>' + escapeHtml(code) + '</code>';
+                    });
+                    var lines2 = textPart.split('\n');
+                    for (var li = 0; li < lines2.length; li++) {
+                        if (li > 0) result += '<br>';
+                        result += lines2[li];
+                    }
+                } else {
+                    var codeBlock = parts[i];
+                    var langEnd = codeBlock.indexOf('\n');
+                    var code = codeBlock;
+                    if (langEnd > 0) code = codeBlock.substring(langEnd + 1);
+                    var escapedCode = escapeHtml(code);
+                    var encodedCode = encodeURIComponent(code);
+                    result += '<div class="code-block-wrapper">';
+                    result += '<pre><code>' + escapedCode + '</code></pre>';
+                    result += '<button class="copy-btn" data-code="' + encodedCode + '" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>';
+                    result += '<button class="run-btn" data-code="' + encodedCode + '" onclick="runCode(this)"><i class="fas fa-play"></i> Run</button>';
+                    result += '<div class="run-output"><span class="output-label"><i class="fas fa-terminal"></i> Output</span><div class="output-content"></div></div></div>';
+                }
+            }
+            return result;
+        }
+
+        function addMessage(role, content) {
+            var chat = document.getElementById('chat');
+            var div = document.createElement('div');
+            div.className = 'message ' + role;
+            var msgIndex = messageCounter++;
+            var result = buildMessageHTML(content);
+            var time = new Date().toLocaleTimeString();
+            result += '<span class="msg-time">' + time + '</span>';
+            div.innerHTML = result;
+            if (role === 'assistant' && content.length > 20) addQuickActions(div, content, msgIndex);
+            if (role === 'assistant' && content.length > 80) addFileActions(div, content);
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            messages.push({ role: role, content: content });
+            if (currentSession) currentSession.msgs.push({ role: role, content: content });
+            persistConversations();
+            if (role === 'assistant') {
+                var lastMsg = chat.lastElementChild;
+                if (lastMsg) {
+                    var rect = lastMsg.getBoundingClientRect();
+                    triggerGeminiBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                } else {
+                    triggerGeminiBurst(window.innerWidth / 2, window.innerHeight / 2);
+                }
+            }
+        }
+
+        /*
+         * Create an assistant bubble immediately, then update it as streamed
+         * OpenRouter tokens arrive. This makes long replies appear "alpo alpo"
+         * instead of all at once.
+         */
+        function createStreamingAssistantMessage() {
+            var chat = document.getElementById('chat');
+            var div = document.createElement('div');
+            div.className = 'message assistant streaming-message';
+            div.innerHTML = '<span class="streaming-cursor" aria-hidden="true"></span>';
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            return div;
+        }
+
+        function updateStreamingAssistantMessage(div, content) {
+            var html = buildMessageHTML(content);
+            html += '<span class="streaming-cursor" aria-hidden="true"></span>';
+            div.innerHTML = html;
+            div.classList.add('streaming-active');
+            var chat = document.getElementById('chat');
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function finishStreamingAssistantMessage(div, content) {
+            var msgIndex = messageCounter++;
+            var result = buildMessageHTML(content);
+            result += '<span class="msg-time">' + new Date().toLocaleTimeString() + '</span>';
+            div.innerHTML = result;
+            div.classList.remove('streaming-message', 'streaming-active');
+
+            if (content.length > 20) addQuickActions(div, content, msgIndex);
+            if (content.length > 80) addFileActions(div, content);
+
+            messages.push({ role: 'assistant', content: content });
+            if (currentSession) currentSession.msgs.push({ role: 'assistant', content: content });
+            persistConversations();
+
+            var rect = div.getBoundingClientRect();
+            triggerGeminiBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        }
+
+        async function readOpenRouterStream(response, onDelta) {
+            if (!response.body || !response.body.getReader) {
+                var fallbackData = await response.json();
+                if (fallbackData.error) {
+                    throw new Error(fallbackData.error.message || JSON.stringify(fallbackData.error));
+                }
+                var fallbackContent =
+                    fallbackData.choices &&
+                    fallbackData.choices[0] &&
+                    fallbackData.choices[0].message
+                        ? (fallbackData.choices[0].message.content || '')
+                        : '';
+                if (fallbackContent) onDelta(fallbackContent);
+                return;
+            }
+
+            var reader = response.body.getReader();
+            var decoder = new TextDecoder('utf-8');
+            var buffer = '';
+
+            while (true) {
+                var readResult = await reader.read();
+                if (readResult.done) break;
+
+                buffer += decoder.decode(readResult.value, { stream: true });
+                var eventLines = buffer.split(/\r?\n/);
+                buffer = eventLines.pop() || '';
+
+                for (var i = 0; i < eventLines.length; i++) {
+                    var line = eventLines[i].trim();
+                    if (!line || line.indexOf('data:') !== 0) continue;
+
+                    var payload = line.slice(5).trim();
+                    if (!payload || payload === '[DONE]') continue;
+
+                    try {
+                        var packet = JSON.parse(payload);
+
+                        if (packet.error) {
+                            throw new Error(packet.error.message || JSON.stringify(packet.error));
+                        }
+
+                        var delta = '';
+                        if (packet.choices && packet.choices.length > 0) {
+                            var choice = packet.choices[0];
+                            if (choice.delta && typeof choice.delta.content === 'string') {
+                                delta = choice.delta.content;
+                            }
+                        }
+
+                        if (delta) onDelta(delta);
+                    } catch (parseErr) {
+                        /*
+                         * Some providers can occasionally send a non-JSON SSE
+                         * comment/event. Ignore only those; real API errors are
+                         * surfaced above when packet.error is present.
+                         */
+                        if (parseErr && parseErr.message && /API|error|invalid|unauthorized/i.test(parseErr.message)) {
+                            throw parseErr;
+                        }
+                    }
+                }
+            }
+
+            buffer += decoder.decode();
+            var tailLines = buffer.split(/\r?\n/);
+            for (var j = 0; j < tailLines.length; j++) {
+                var tail = tailLines[j].trim();
+                if (!tail || tail.indexOf('data:') !== 0) continue;
+
+                var tailPayload = tail.slice(5).trim();
+                if (!tailPayload || tailPayload === '[DONE]') continue;
+
+                try {
+                    var tailPacket = JSON.parse(tailPayload);
+                    if (tailPacket.error) {
+                        throw new Error(tailPacket.error.message || JSON.stringify(tailPacket.error));
+                    }
+                    if (tailPacket.choices && tailPacket.choices[0] &&
+                        tailPacket.choices[0].delta &&
+                        typeof tailPacket.choices[0].delta.content === 'string') {
+                        onDelta(tailPacket.choices[0].delta.content);
+                    }
+                } catch (e) {
+                    if (e && e.message && /API|error|invalid|unauthorized/i.test(e.message)) throw e;
+                }
+            }
+        }
+
+        var DAILY_TOKENS = 10;
+        var YEAR_TOKENS = 3650;
+        var guestId = sessionStorage.getItem('cloto_guest_id');
+        if (!guestId) {
+            guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('cloto_guest_id', guestId);
+        }
+        function getUserSpecificKey(baseKey) { return currentUserEmail ? baseKey + '_' + currentUserEmail : baseKey + '_' + guestId; }
+        function getTokenState() {
+            try {
+                var data = localStorage.getItem(getUserSpecificKey('cloto_tokens'));
+                if (data) return JSON.parse(data);
+            } catch (e) {}
+            return { tokens: 0, lastReset: null };
+        }
+        function saveTokenState(state) { localStorage.setItem(getUserSpecificKey('cloto_tokens'), JSON.stringify(state)); }
+        function getToday() { return new Date().toDateString(); }
+        function resetTokensIfNeeded() {
+            var state = getTokenState();
+            if (state.lastReset !== getToday()) {
+                state.tokens = DAILY_TOKENS;
+                state.lastReset = getToday();
+                saveTokenState(state);
+            }
+            return state;
+        }
+        function getTokens() { return resetTokensIfNeeded().tokens; }
+        function setTokens(amount) {
+            var state = resetTokensIfNeeded();
+            state.tokens = Math.max(0, amount);
+            saveTokenState(state);
+            updateTokenUI();
+        }
+        function useToken() {
+            var state = resetTokensIfNeeded();
+            if (state.tokens > 0) {
+                state.tokens--;
+                saveTokenState(state);
+                updateTokenUI();
+                return true;
+            }
+            updateTokenUI();
+            return false;
+        }
+        function updateTokenUI() {
+            var tokens = getTokens();
+            var el = document.getElementById('tokenCount');
+            if (el) { el.textContent = tokens; if (tokens === 0) el.classList.add('zero'); else el.classList.remove('zero'); }
+            var sendBtn = document.getElementById('sendBtn');
+            var input = document.getElementById('userInput');
+            if (tokens === 0) {
+                if (sendBtn) sendBtn.disabled = true;
+                if (input) { input.disabled = true; input.placeholder = '⛔ No tokens left. Like Cloto to get more!'; }
+            } else {
+                if (sendBtn) sendBtn.disabled = false;
+                if (input) { input.disabled = false; input.placeholder = 'Ask anything…'; }
+            }
+        }
+        function getLikedStatus() { try { return localStorage.getItem(getUserSpecificKey('cloto_liked')) === 'true'; } catch (e) { return false; } }
+        function setLikedStatus(val) { localStorage.setItem(getUserSpecificKey('cloto_liked'), String(val)); }
+        function getRedeemedStatus() { try { return localStorage.getItem(getUserSpecificKey('cloto_redeemed')) === 'true'; } catch (e) { return false; } }
+        function setRedeemedStatus(val) { localStorage.setItem(getUserSpecificKey('cloto_redeemed'), String(val)); }
+        function getRedeemCode() { try { return localStorage.getItem(getUserSpecificKey('cloto_code')) || null; } catch (e) { return null; } }
+        function setRedeemCode(code) { localStorage.setItem(getUserSpecificKey('cloto_code'), code); }
+        function generateUniqueCode() {
+            var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var code = 'sn-';
+            for (var i = 0; i < 10; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            return code;
+        }
+
+        function handleLike() {
+            var btn = document.getElementById('likeBtn');
+            if (getLikedStatus()) { showTokenMessage('You already liked Cloto AI! ❤️', 'info'); return; }
+            var code = generateUniqueCode();
+            setRedeemCode(code);
+            setLikedStatus(true);
+            btn.classList.add('liked');
+            btn.innerHTML = '<i class="fas fa-heart"></i><span class="like-count show" id="likeCount">1</span>';
+            showTokenMessage('❤️ You liked Cloto AI! Here\'s your unique redeem code:', 'code', code);
+            speakText('Thank you for liking me! Your unique redeem code is ' + code.split('').join(' ') + '. Go to the top and click the redeem button to get 1 year of tokens.');
+        }
+        function updateLikeUI() {
+            var btn = document.getElementById('likeBtn');
+            if (getLikedStatus()) {
+                btn.classList.add('liked');
+                btn.innerHTML = '<i class="fas fa-heart"></i><span class="like-count show" id="likeCount">1</span>';
+            } else {
+                btn.classList.remove('liked');
+                btn.innerHTML = '<i class="fas fa-heart"></i><span class="like-count" id="likeCount">0</span>';
+            }
+        }
+
+        function openRedeemModal() {
+            var modal = document.getElementById('redeemModal');
+            var input = document.getElementById('redeemCodeInput');
+            var status = document.getElementById('redeemStatus');
+            modal.classList.add('show');
+            input.value = '';
+            status.className = 'redeem-status';
+            status.textContent = '';
+            input.focus();
+            if (getRedeemedStatus()) { status.className = 'redeem-status info'; status.textContent = '🎉 You already have 1 year of tokens!'; }
+        }
+        function closeRedeemModal() { document.getElementById('redeemModal').classList.remove('show'); }
+        function redeemCode() {
+            var input = document.getElementById('redeemCodeInput');
+            var status = document.getElementById('redeemStatus');
+            var code = input.value.trim();
+            if (getRedeemedStatus()) { status.className = 'redeem-status info'; status.textContent = '🎉 You already have 1 year of tokens!'; return; }
+            if (!code) { status.className = 'redeem-status error'; status.textContent = '⚠️ Please enter your redeem code.'; return; }
+            if (code === getRedeemCode()) {
+                setRedeemedStatus(true);
+                setTokens(YEAR_TOKENS);
+                status.className = 'redeem-status success';
+                status.textContent = '🎉 Success! You received 3650 tokens (1 year supply)!';
+                document.getElementById('redeemBtn').classList.add('redeemed');
+                document.getElementById('redeemBtn').innerHTML = '<i class="fas fa-check"></i> Redeemed';
+                updateTokenUI();
+                removeTokenMessage();
+                speakText('Congratulations! You have successfully redeemed 1 year of tokens.');
+                setTimeout(closeRedeemModal, 3000);
+            } else {
+                status.className = 'redeem-status error';
+                status.textContent = '❌ Invalid redeem code. Please check and try again.';
+                input.value = '';
+                input.focus();
+            }
+        }
+        document.getElementById('redeemCodeInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); redeemCode(); } });
+        document.getElementById('redeemModal').addEventListener('click', function(e) { if (e.target === this) closeRedeemModal(); });
+
+        var tokenMessageEl = null;
+        function showTokenMessage(message, type, code) {
+            removeTokenMessage();
+            var chat = document.getElementById('chat');
+            var div = document.createElement('div');
+            div.className = 'token-message';
+            div.id = 'tokenMessage';
+            var html = '';
+            if (type === 'code') {
+                html = '<span class="token-emoji">❤️</span><div>' + message + '</div>';
+                html += '<div class="token-code">' + code + '</div>';
+                html += '<div class="token-redeem-hint"><i class="fas fa-arrow-up"></i> Go to top and click <strong>Redeem</strong> button to get 1 Year tokens!</div>';
+                html += '<button class="token-like-btn liked" onclick="closeRedeemModal();document.getElementById(\'redeemBtn\').click();"><i class="fas fa-gift"></i> Redeem Now</button>';
+            } else if (type === 'info') {
+                html = '<span class="token-emoji">ℹ️</span><div>' + message + '</div>';
+            } else {
+                var liked = getLikedStatus();
+                html = '<span class="token-emoji">⛔</span><div><strong>Your token is ended.</strong></div>';
+                html += '<div style="font-size:12px;color:var(--txt3);margin-top:4px;">If you get more token, you like this AI ❤️</div>';
+                if (liked) {
+                    html += '<div style="margin-top:8px;font-size:12px;color:var(--gold);"><i class="fas fa-check-circle"></i> You already liked Cloto AI! <span class="token-redeem-hint"><i class="fas fa-arrow-up"></i> Go to top and click <strong>Redeem</strong> to get 1 Year tokens!</span></div>';
+                    html += '<button class="token-like-btn liked" onclick="closeRedeemModal();document.getElementById(\'redeemBtn\').click();"><i class="fas fa-gift"></i> Redeem Now</button>';
+                } else {
+                    html += '<button class="token-like-btn" onclick="handleLike()"><i class="fas fa-heart"></i> Like Cloto AI</button>';
+                }
+            }
+            div.innerHTML = html;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            tokenMessageEl = div;
+        }
+        function removeTokenMessage() { if (tokenMessageEl) { tokenMessageEl.remove(); tokenMessageEl = null; } }
+        function checkTokensBeforeSend() {
+            if (getTokens() <= 0) { showTokenMessage(); speakText('Your token is ended. If you get more token, you like this AI.'); return false; }
+            removeTokenMessage();
+            return true;
+        }
+
+        var USERS_KEY = 'cloto_users', SESSION_KEY = 'cloto_session';
+        function getUsers() { try { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); } catch (e) { return {}; } }
+        function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+        function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch (e) { return null; } }
+        function saveSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+        function clearSession() { localStorage.removeItem(SESSION_KEY); }
+        function initials(n) {
+            var parts = n.split(' '), result = '';
+            for (var i = 0; i < parts.length && i < 2; i++) result += parts[i][0] || '';
+            return result.toUpperCase() || '?';
+        }
+        function showError(msg) {
+            var el = document.getElementById('authError');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(el._t);
+            el._t = setTimeout(function() { el.classList.remove('show'); }, 4000);
+        }
+        function switchTab(tab) {
+            document.getElementById('authError').classList.remove('show');
+            var tabs = document.querySelectorAll('.auth-tab');
+            for (var i = 0; i < tabs.length; i++) {
+                var isActive = (tab === 'signin' && i === 0) || (tab === 'signup' && i === 1);
+                tabs[i].classList.toggle('active', isActive);
+            }
+            document.getElementById('signinForm').style.display = tab === 'signin' ? 'flex' : 'none';
+            document.getElementById('signupForm').style.display = tab === 'signup' ? 'flex' : 'none';
+        }
+        function migrateGuestTokensToUser(email) {
+            var userKey = 'cloto_tokens_' + email;
+            if (localStorage.getItem(userKey)) return;
+            var guestKey = 'cloto_tokens_' + guestId;
+            var guestData = localStorage.getItem(guestKey);
+            if (guestData) {
+                localStorage.setItem(userKey, guestData);
+                localStorage.removeItem(guestKey);
+                ['liked', 'redeemed', 'code'].forEach(function(k) {
+                    var gk = 'cloto_' + k + '_' + guestId;
+                    var gv = localStorage.getItem(gk);
+                    if (gv) { localStorage.setItem('cloto_' + k + '_' + email, gv); localStorage.removeItem(gk); }
+                });
+            }
+        }
+        function handleSignUp() {
+            var name = document.getElementById('suName').value.trim();
+            var email = document.getElementById('suEmail').value.trim().toLowerCase();
+            var pass = document.getElementById('suPass').value;
+            var pass2 = document.getElementById('suPass2').value;
+            if (!name) return showError('Please enter your display name.');
+            if (!email || email.indexOf('@') === -1) return showError('Please enter a valid email.');
+            if (pass.length < 6) return showError('Password must be at least 6 characters.');
+            if (pass !== pass2) return showError('Passwords do not match.');
+            var users = getUsers();
+            if (users[email]) return showError('Email already registered.');
+            users[email] = { name: name, email: email, pass: pass, joined: Date.now() };
+            saveUsers(users);
+            var s = { name: name, email: email, role: 'Member', guest: false };
+            saveSession(s);
+            currentUserEmail = email;
+            migrateGuestTokensToUser(email);
+            enterApp(s);
+        }
+        function handleSignIn() {
+            var email = document.getElementById('siEmail').value.trim().toLowerCase();
+            var pass = document.getElementById('siPass').value;
+            if (!email) return showError('Please enter your email.');
+            if (!pass) return showError('Please enter your password.');
+            var users = getUsers();
+            var user = users[email];
+            if (!user) return showError('No account found with this email.');
+            if (user.pass !== pass) return showError('Incorrect password.');
+            var s = { name: user.name, email: email, role: 'Member', guest: false };
+            saveSession(s);
+            currentUserEmail = email;
+            migrateGuestTokensToUser(email);
+            enterApp(s);
+        }
+        function handleGuest() {
+            if (!sessionStorage.getItem('cloto_guest_id')) {
+                var newGuestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                sessionStorage.setItem('cloto_guest_id', newGuestId);
+            }
+            var s = { name: 'Guest', email: null, role: 'Guest', guest: true };
+            saveSession(s);
+            currentUserEmail = null;
+            enterApp(s);
+        }
+        function enterApp(session) {
+            document.getElementById('userAvatar').textContent = initials(session.name);
+            document.getElementById('userName').textContent = session.name;
+            document.getElementById('userRole').textContent = session.guest ? 'Guest' : session.email;
+            document.getElementById('authScreen').classList.add('fade-out');
+            setTimeout(function() {
+                document.getElementById('authScreen').style.display = 'none';
+                showXaiMotif();
+            }, 280);
+        }
+        function showXaiMotif() {
+            var motif = document.getElementById('xaiMotif');
+            var mark = document.getElementById('xaiLogoMark');
+            var glow = document.getElementById('xaiGlowPanel');
+            var cta = document.getElementById('xaiCta');
+            mark.style.cssText = 'opacity:0;transform:translateX(-60px)';
+            glow.style.cssText = 'opacity:0;transform:translateX(160px)';
+            cta.classList.remove('visible');
+            xaiReady = false;
+            xaiGTx = 0; xaiGTy = 0; xaiLTx = 0; xaiLTy = 0; xaiGCx = 0; xaiGCy = 0; xaiLCx = 0; xaiLCy = 0;
+            motif.style.display = 'block';
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    mark.style.transition = 'opacity 1s cubic-bezier(0.22,1,0.36,1) 0.15s, transform 1s cubic-bezier(0.22,1,0.36,1) 0.15s';
+                    mark.style.opacity = '0.1';
+                    mark.style.transform = 'translateX(0)';
+                    glow.style.transition = 'opacity 1.1s cubic-bezier(0.22,1,0.36,1) 0.3s, transform 1.1s cubic-bezier(0.22,1,0.36,1) 0.3s';
+                    glow.style.opacity = '1';
+                    glow.style.transform = 'translateX(0)';
+                });
+            });
+            setTimeout(function() { cta.classList.add('visible'); }, 1100);
+            setTimeout(function() {
+                mark.style.transition = 'none';
+                glow.style.transition = 'none';
+                xaiReady = true;
+                loadUserConversations();
+                resetTokensIfNeeded();
+                updateTokenUI();
+                updateLikeUI();
+                if (getRedeemedStatus()) {
+                    document.getElementById('redeemBtn').classList.add('redeemed');
+                    document.getElementById('redeemBtn').innerHTML = '<i class="fas fa-check"></i> Redeemed';
+                }
+            }, 1450);
+        }
+        function enterClotoApp() {
+            var motif = document.getElementById('xaiMotif');
+            xaiReady = false;
+            motif.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
+            motif.style.opacity = '0';
+            motif.style.transform = 'scale(1.04)';
+            setTimeout(function() {
+                motif.style.display = 'none';
+                motif.style.cssText = 'display:none';
+                document.getElementById('appScreen').classList.add('visible', 'fade-in');
+                loadUserConversations();
+                resetTokensIfNeeded();
+                updateTokenUI();
+                updateLikeUI();
+                if (getRedeemedStatus()) {
+                    document.getElementById('redeemBtn').classList.add('redeemed');
+                    document.getElementById('redeemBtn').innerHTML = '<i class="fas fa-check"></i> Redeemed';
+                }
+            }, 450);
+        }
+        window.addEventListener('DOMContentLoaded', function() {
+            var s = getSession();
+            if (s) { currentUserEmail = s.email || null; enterApp(s); }
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key !== 'Enter') return;
+            if (document.getElementById('authScreen').style.display === 'none') return;
+            var signupVisible = document.getElementById('signupForm').style.display !== 'none';
+            if (signupVisible) handleSignUp(); else handleSignIn();
+        });
+
+        function onXaiPointer(cx, cy) {
+            if (!xaiReady) return;
+            var mx = cx / window.innerWidth - 0.5;
+            var my = cy / window.innerHeight - 0.5;
+            xaiGTx = mx * -18; xaiGTy = my * 12;
+            xaiLTx = mx * 7; xaiLTy = my * 5;
+        }
+        document.addEventListener('mousemove', function(e) { onXaiPointer(e.clientX, e.clientY); });
+        document.addEventListener('touchmove', function(e) { var t = e.touches[0]; onXaiPointer(t.clientX, t.clientY); }, { passive: true });
+        function xaiLoop() {
+            var ease = 0.055;
+            xaiGCx += (xaiGTx - xaiGCx) * ease;
+            xaiGCy += (xaiGTy - xaiGCy) * ease;
+            xaiLCx += (xaiLTx - xaiLCx) * ease;
+            xaiLCy += (xaiLTy - xaiLCy) * ease;
+            if (xaiReady) {
+                var g = document.getElementById('xaiGlowPanel');
+                var l = document.getElementById('xaiLogoMark');
+                if (g) g.style.transform = 'translate(' + xaiGCx.toFixed(2) + 'px,' + xaiGCy.toFixed(2) + 'px)';
+                if (l) l.style.transform = 'translate(' + xaiLCx.toFixed(2) + 'px,' + xaiLCy.toFixed(2) + 'px)';
+            }
+            animFrameId = requestAnimationFrame(xaiLoop);
+        }
+        xaiLoop();
+
+        function toggleSidebar() {
+            var sb = document.getElementById('sidebar');
+            var bd = document.getElementById('sidebarBackdrop');
+            var isOpen = sb.classList.toggle('open');
+            bd.classList.toggle('show', isOpen);
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarBackdrop').classList.remove('show');
+        }
+        function showLogoutConfirm() { document.getElementById('logoutOverlay').classList.add('show'); }
+        function cancelLogout() { document.getElementById('logoutOverlay').classList.remove('show'); }
+        function confirmLogout() {
+            saveUserConversations();
+            clearSession();
+            messages = [];
+            chatSessions = [];
+            currentSession = null;
+            renderHistory();
+            newChat(true);
+            document.getElementById('logoutOverlay').classList.remove('show');
+            document.getElementById('appScreen').classList.remove('visible', 'fade-in');
+            var auth = document.getElementById('authScreen');
+            auth.style.display = 'flex';
+            auth.classList.remove('fade-out');
+            document.getElementById('siEmail').value = '';
+            document.getElementById('siPass').value = '';
+            closeSidebar();
+            currentUserEmail = null;
+            if (voiceModeEnabled) toggleVoiceMode();
+            if (voiceChatActive) toggleVoiceChat();
+            if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+            hideMicStar();
+            document.getElementById('geminiBurst').classList.remove('show');
+            updateTokenUI();
+            updateLikeUI();
+        }
+
+        var MAX_SESSIONS = 20;
+        var MAX_MESSAGE_LENGTH = 5000;
+        function getStorageKey() { return currentUserEmail ? 'cloto_conversations_' + currentUserEmail : null; }
+        function cleanupOldSessions() {
+            if (chatSessions.length > MAX_SESSIONS) chatSessions = chatSessions.slice(0, MAX_SESSIONS);
+            for (var i = 0; i < chatSessions.length; i++) {
+                var s = chatSessions[i];
+                for (var j = 0; j < s.msgs.length; j++) {
+                    var m = s.msgs[j];
+                    if (m.content && m.content.length > MAX_MESSAGE_LENGTH) m.content = m.content.slice(0, MAX_MESSAGE_LENGTH) + '… (truncated)';
+                }
+                if (s.msgs.length > 50) s.msgs = s.msgs.slice(-50);
+            }
+        }
+        function loadUserConversations() {
+            var key = getStorageKey();
+            if (!key) {
+                var data = localStorage.getItem('cloto_conversations_guest');
+                if (data) { try { chatSessions = JSON.parse(data); renderHistory(); } catch (e) {} }
+                return;
+            }
+            try {
+                var data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        var parsed = JSON.parse(data);
+                        if (Array.isArray(parsed)) {
+                            chatSessions = parsed;
+                            cleanupOldSessions();
+                            renderHistory();
+                            if (chatSessions.length > 0) loadSession(chatSessions[0]);
+                        }
+                    } catch (e) { chatSessions = []; }
+                } else { chatSessions = []; renderHistory(); }
+            } catch (e) { chatSessions = []; renderHistory(); }
+        }
+        function saveUserConversations() {
+            try {
+                cleanupOldSessions();
+                var key = getStorageKey();
+                if (!key) { localStorage.setItem('cloto_conversations_guest', JSON.stringify(chatSessions)); return; }
+                localStorage.setItem(key, JSON.stringify(chatSessions));
+                document.getElementById('storageWarning').classList.remove('show');
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.code === 22) {
+                    document.getElementById('storageWarning').classList.add('show');
+                    if (chatSessions.length > 10) {
+                        chatSessions = chatSessions.slice(0, 10);
+                        try {
+                            var key = getStorageKey();
+                            if (key) localStorage.setItem(key, JSON.stringify(chatSessions));
+                            else localStorage.setItem('cloto_conversations_guest', JSON.stringify(chatSessions));
+                            document.getElementById('storageWarning').classList.remove('show');
+                        } catch (e2) {
+                            chatSessions = [];
+                            renderHistory();
+                            document.getElementById('storageWarning').textContent = '⚠️ Storage full. Old conversations have been cleared.';
+                            document.getElementById('storageWarning').classList.add('show');
+                        }
+                    } else {
+                        chatSessions = [];
+                        renderHistory();
+                        document.getElementById('storageWarning').textContent = '⚠️ Storage full. All conversations have been cleared to free space.';
+                        document.getElementById('storageWarning').classList.add('show');
+                    }
+                }
+            }
+        }
+        function persistConversations() {
+            if (persistConversations._timeout) clearTimeout(persistConversations._timeout);
+            persistConversations._timeout = setTimeout(function() {
+                saveUserConversations();
+                persistConversations._timeout = null;
+            }, 500);
+        }
+
+        var gameActive = false, gameBoard = [], gameCurrentPlayer = 'X', gameWinner = null, gameMoves = 0, gameOver = false;
+        var gameMode = 'pvc';
+        var isComputerThinking = false;
+
+        function toggleVoiceMode() {
+            voiceModeEnabled = !voiceModeEnabled;
+            var toggle = document.getElementById('voiceModeToggle');
+            var indicator = document.getElementById('voiceModeIndicator');
+            if (voiceModeEnabled) {
+                toggle.classList.add('active');
+                indicator.classList.add('active');
+                if (!voiceEnabled) { voiceEnabled = true; document.getElementById('voiceToggle').classList.add('active'); }
+                speakText('Voice mode activated. I will speak my responses.');
+            } else {
+                toggle.classList.remove('active');
+                indicator.classList.remove('active');
+                if (synth) synth.cancel();
+            }
+        }
+        document.querySelectorAll('.mode-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mode-btn').forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+            });
+        });
+        function toggleVoiceOutput() {
+            voiceEnabled = !voiceEnabled;
+            document.getElementById('voiceToggle').classList.toggle('active');
+            if (!voiceEnabled && synth) synth.cancel();
+            if (voiceEnabled && voiceModeEnabled) speakText('Voice output enabled.');
+        }
+        function toggleVoiceChat() {
+            voiceChatActive = !voiceChatActive;
+            var btn = document.getElementById('voiceChatBtn');
+            if (voiceChatActive) {
+                btn.classList.add('active');
+                btn.innerHTML = '<span class="pulse-ring"></span><i class="fas fa-comment-dots"></i>';
+                if (!voiceEnabled) { voiceEnabled = true; document.getElementById('voiceToggle').classList.add('active'); }
+                if (!voiceModeEnabled) toggleVoiceMode();
+                showMicStar();
+                setTimeout(function() {
+                    speakText('Hello, I\'m Cloto. How can I help you today?');
+                    setTimeout(function() { if (voiceChatActive) startVoiceChatListening(); }, 1500);
+                }, 300);
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '<span class="pulse-ring"></span><i class="fas fa-comment-dots"></i>';
+                stopVoiceChatListening();
+                if (synth) synth.cancel();
+                hideMicStar();
+            }
+        }
+        function startVoiceChatListening() {
+            if (!voiceChatActive) return;
+            if (voiceChatListening) return;
+            voiceChatListening = true;
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                voiceChatListening = false;
+                voiceChatActive = false;
+                document.getElementById('voiceChatBtn').classList.remove('active');
+                document.getElementById('voiceChatBtn').innerHTML = '<span class="pulse-ring"></span><i class="fas fa-comment-dots"></i>';
+                hideMicStar();
+                alert('Voice recognition not supported. Please use Chrome or Edge.');
+                return;
+            }
+            var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SR();
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            var input = document.getElementById('userInput');
+            input.placeholder = '🎤 Voice Chat listening...';
+            recognition.onresult = function(e) {
+                var final = '', interim = '';
+                for (var i = e.resultIndex; i < e.results.length; i++) {
+                    var t = e.results[i][0].transcript;
+                    if (e.results[i].isFinal) final += t; else interim += t;
+                }
+                if (final) {
+                    input.value = final;
+                    input.style.height = 'auto';
+                    input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+                    stopVoiceChatListening();
+                    setTimeout(function() { sendMessage(); }, 300);
+                } else if (interim) {
+                    input.value = interim;
+                    input.style.height = 'auto';
+                    input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+                }
+            };
+            recognition.onerror = function(e) {
+                if (e.error === 'not-allowed') {
+                    alert('Please allow microphone access.');
+                    voiceChatActive = false;
+                    document.getElementById('voiceChatBtn').classList.remove('active');
+                    document.getElementById('voiceChatBtn').innerHTML = '<span class="pulse-ring"></span><i class="fas fa-comment-dots"></i>';
+                    voiceChatListening = false;
+                    hideMicStar();
+                } else if (e.error === 'no-speech') { if (voiceChatActive) setTimeout(startVoiceChatListening, 500); }
+                else { if (voiceChatActive) setTimeout(startVoiceChatListening, 1000); }
+            };
+            recognition.onend = function() { if (voiceChatActive && voiceChatListening) setTimeout(startVoiceChatListening, 500); };
+            try { recognition.start(); } catch (e) { if (voiceChatActive) setTimeout(startVoiceChatListening, 1000); }
+        }
+        function stopVoiceChatListening() {
+            voiceChatListening = false;
+            if (recognition) { try { recognition.stop(); } catch (e) {} recognition = null; }
+            var input = document.getElementById('userInput');
+            if (input.placeholder === '🎤 Voice Chat listening...') input.placeholder = 'Ask anything…';
+        }
+        function toggleVoice() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Voice recognition is not supported in this browser. Please use Chrome or Edge.');
+                return;
+            }
+            if (voiceChatActive) { toggleVoiceChat(); return; }
+            if (isListening) { stopListening(); hideMicStar(); } else { showMicStar(); startListening(); }
+        }
+        function startListening() {
+            var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SR();
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            var btn = document.getElementById('voiceBtn');
+            btn.classList.add('active');
+            btn.innerHTML = '<i class="fas fa-stop"></i>';
+            isListening = true;
+            var input = document.getElementById('userInput');
+            input.placeholder = '🎤 Listening...';
+            recognition.onresult = function(e) {
+                var final = '', interim = '';
+                for (var i = e.resultIndex; i < e.results.length; i++) {
+                    var t = e.results[i][0].transcript;
+                    if (e.results[i].isFinal) final += t; else interim += t;
+                }
+                if (final) {
+                    input.value = final;
+                    input.style.height = 'auto';
+                    input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+                    stopListening();
+                    setTimeout(function() { sendMessage(); }, 300);
+                } else if (interim) {
+                    input.value = interim;
+                    input.style.height = 'auto';
+                    input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+                }
+            };
+            recognition.onerror = function(e) {
+                if (e.error === 'not-allowed') alert('Please allow microphone access.');
+                stopListening(); hideMicStar();
+            };
+            recognition.onend = function() { if (isListening) { stopListening(); hideMicStar(); } };
+            try { recognition.start(); } catch (e) { stopListening(); hideMicStar(); }
+        }
+        function stopListening() {
+            if (recognition) { try { recognition.stop(); } catch (e) {} recognition = null; }
+            isListening = false;
+            var btn = document.getElementById('voiceBtn');
+            btn.classList.remove('active');
+            btn.innerHTML = '<i class="fas fa-microphone"></i>';
+            var inp = document.getElementById('userInput');
+            if (inp.placeholder === '🎤 Listening...') inp.placeholder = 'Ask anything…';
+            hideMicStar();
+        }
+        function speakText(text) {
+            if (!voiceEnabled || !synth) return;
+            synth.cancel();
+            var clean = text.replace(/[#*_`~]/g, '').trim();
+            if (!clean) return;
+            var u = new SpeechSynthesisUtterance(clean);
+            u.rate = 1; u.pitch = 1; u.volume = 1;
+            var voices = synth.getVoices();
+            var v = voices.find(function(voice) { return voice.lang.startsWith('en') && (voice.name.includes('Google') || voice.name.includes('Samantha')); });
+            if (v) u.voice = v;
+            synth.speak(u);
+        }
+
+        function newChat(silent) {
+            messages = [];
+            var chat = document.getElementById('chat');
+            chat.innerHTML = '';
+            var welcome = document.getElementById('welcomeState');
+            if (welcome) chat.appendChild(welcome);
+            messageCounter = 0;
+            currentSession = { id: Date.now(), title: 'New Chat', msgs: [], created: new Date().toISOString() };
+            chatSessions.unshift(currentSession);
+            renderHistory();
+            if (!silent) speakText('Started a new chat. How can I help you?');
+            persistConversations();
+            updateTokenUI();
+            if (gameActive) toggleGame();
+        }
+        function loadSession(session) {
+            if (!session || !session.msgs) return;
+            messages = [];
+            var chat = document.getElementById('chat');
+            chat.innerHTML = '';
+            messageCounter = 0;
+            for (var i = 0; i < session.msgs.length; i++) addMessage(session.msgs[i].role, session.msgs[i].content);
+            currentSession = session;
+            renderHistory();
+            updateTokenUI();
+            if (gameActive) toggleGame();
+        }
+        function renderHistory() {
+            var list = document.getElementById('historyList');
+            list.innerHTML = '';
+            var items = chatSessions.slice(0, MAX_SESSIONS);
+            for (var i = 0; i < items.length; i++) {
+                var s = items[i];
+                var div = document.createElement('div');
+                div.className = 'history-item';
+                if (currentSession && currentSession.id === s.id) div.classList.add('active');
+                var preview = s.title || 'Chat ' + (i + 1);
+                if (s.msgs && s.msgs.length > 0 && s.msgs[0].content) preview = s.msgs[0].content.substring(0, 30) + (s.msgs[0].content.length > 30 ? '…' : '');
+                div.textContent = preview;
+                div.title = preview;
+                div.onclick = function(session) { return function() { loadSession(session); closeSidebar(); }; }(s);
+                list.appendChild(div);
+            }
+        }
+
+        function toggleGame() {
+            gameActive = !gameActive;
+            var btn = document.getElementById('gameToggle');
+            if (gameActive) { btn.classList.add('active'); gameMode = 'pvc'; startGame(); }
+            else {
+                btn.classList.remove('active');
+                var container = document.querySelector('.ttt-container');
+                if (container) container.remove();
+                isComputerThinking = false;
+            }
+        }
+        function startGame() {
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            gameCurrentPlayer = 'X';
+            gameWinner = null;
+            gameMoves = 0;
+            gameOver = false;
+            isComputerThinking = false;
+            renderGame();
+        }
+        function renderGame() {
+            var existing = document.querySelector('.ttt-container');
+            if (existing) existing.remove();
+            var container = document.createElement('div');
+            container.className = 'ttt-container';
+            var status = document.createElement('div');
+            status.className = 'ttt-status';
+            status.id = 'tttStatus';
+            status.innerHTML = (gameMode === 'pvc' ? 'You (X) vs Computer (O)' : 'Player X vs Player O') + '<br><span class="highlight">' + (gameCurrentPlayer === 'X' ? 'Your turn' : 'Computer\'s turn') + '</span>';
+            container.appendChild(status);
+            var board = document.createElement('div');
+            board.className = 'ttt-board';
+            board.id = 'tttBoard';
+            for (var i = 0; i < 9; i++) {
+                var cell = document.createElement('div');
+                cell.className = 'ttt-cell';
+                cell.dataset.index = i;
+                cell.textContent = gameBoard[i];
+                if (gameBoard[i] === 'X') cell.classList.add('x');
+                if (gameBoard[i] === 'O') cell.classList.add('o');
+                if (gameBoard[i] || gameOver || (gameMode === 'pvc' && gameCurrentPlayer === 'O')) cell.classList.add('disabled');
+                cell.onclick = (function(idx) { return function() { handleCellClick(idx); }; })(i);
+                board.appendChild(cell);
+            }
+            container.appendChild(board);
+            var controls = document.createElement('div');
+            controls.className = 'ttt-controls';
+            var modeBtn = document.createElement('button');
+            modeBtn.className = 'ttt-mode-btn' + (gameMode === 'pvc' ? ' active' : '');
+            modeBtn.innerHTML = gameMode === 'pvc' ? '🤖 vs Computer' : '👥 2 Players';
+            modeBtn.onclick = function() { gameMode = (gameMode === 'pvc') ? 'pvp' : 'pvc'; startGame(); };
+            controls.appendChild(modeBtn);
+            var resetBtn = document.createElement('button');
+            resetBtn.className = 'ttt-btn primary';
+            resetBtn.innerHTML = '<i class="fas fa-rotate"></i> New Game';
+            resetBtn.onclick = function() { startGame(); };
+            controls.appendChild(resetBtn);
+            var closeBtn = document.createElement('button');
+            closeBtn.className = 'ttt-btn';
+            closeBtn.innerHTML = '<i class="fas fa-times"></i> Close';
+            closeBtn.onclick = function() { toggleGame(); };
+            controls.appendChild(closeBtn);
+            container.appendChild(controls);
+            var chat = document.getElementById('chat');
+            chat.appendChild(container);
+            chat.scrollTop = chat.scrollHeight;
+            if (gameMode === 'pvc' && gameCurrentPlayer === 'O' && !gameOver && !gameWinner) {
+                isComputerThinking = true;
+                setTimeout(function() {
+                    if (gameActive && gameMode === 'pvc' && gameCurrentPlayer === 'O' && !gameOver) computerMove();
+                    isComputerThinking = false;
+                }, 500);
+            }
+        }
+        function handleCellClick(index) {
+            if (gameOver || gameWinner) return;
+            if (gameMode === 'pvc' && gameCurrentPlayer === 'O') return;
+            if (gameBoard[index] !== '') return;
+            makeMove(index);
+            if (gameOver || gameWinner) return;
+            if (gameMode === 'pvc' && gameCurrentPlayer === 'O' && !gameOver) {
+                isComputerThinking = true;
+                setTimeout(function() {
+                    if (gameActive && gameMode === 'pvc' && gameCurrentPlayer === 'O' && !gameOver) computerMove();
+                    isComputerThinking = false;
+                }, 500);
+            }
+        }
+        function makeMove(index) {
+            if (gameOver || gameBoard[index] || gameWinner) return;
+            gameBoard[index] = gameCurrentPlayer;
+            gameMoves++;
+            var cells = document.querySelectorAll('.ttt-cell');
+            var cell = cells[index];
+            cell.textContent = gameCurrentPlayer;
+            cell.classList.add(gameCurrentPlayer.toLowerCase());
+            cell.classList.add('pop');
+            cell.classList.add('disabled');
+            var winner = checkWinner();
+            if (winner) {
+                gameWinner = winner;
+                gameOver = true;
+                highlightWinningCells();
+                var status = document.getElementById('tttStatus');
+                var msg = (gameMode === 'pvc') ? (winner === 'X' ? '🎉 You win!' : '🤖 Computer wins!') : '🎉 Player ' + winner + ' wins!';
+                status.innerHTML = msg;
+                speakText(msg);
+                return;
+            }
+            if (gameMoves === 9) {
+                gameOver = true;
+                var status = document.getElementById('tttStatus');
+                status.innerHTML = '🤝 It\'s a draw!';
+                speakText('The game is a draw.');
+                return;
+            }
+            gameCurrentPlayer = (gameCurrentPlayer === 'X') ? 'O' : 'X';
+            updateStatus();
+        }
+        function updateStatus() {
+            var status = document.getElementById('tttStatus');
+            if (!status) return;
+            if (gameMode === 'pvc') {
+                var turnText = (gameCurrentPlayer === 'X') ? 'Your turn' : 'Computer\'s turn';
+                status.innerHTML = 'You (X) vs Computer (O)<br><span class="highlight">' + turnText + '</span>';
+            } else {
+                status.innerHTML = 'Player <span class="highlight">' + gameCurrentPlayer + '</span>\'s turn';
+            }
+            var cells = document.querySelectorAll('.ttt-cell');
+            var isDisabled = (gameMode === 'pvc' && gameCurrentPlayer === 'O') || gameOver || gameWinner;
+            cells.forEach(function(cell) {
+                if (cell.textContent === '') {
+                    if (isDisabled) cell.classList.add('disabled');
+                    else cell.classList.remove('disabled');
+                }
+            });
+        }
+        function computerMove() {
+            if (gameOver || gameWinner) return;
+            if (gameMode !== 'pvc') return;
+            if (gameCurrentPlayer !== 'O') return;
+            var index = getBestMove();
+            if (index === -1) return;
+            makeMove(index);
+            if (!gameOver && !gameWinner) {
+                updateStatus();
+                var cells = document.querySelectorAll('.ttt-cell');
+                cells.forEach(function(cell) { if (cell.textContent === '' && !gameOver) cell.classList.remove('disabled'); });
+            }
+        }
+        function getBestMove() {
+            var bestScore = -Infinity, bestMove = -1;
+            var empty = [];
+            for (var i = 0; i < 9; i++) if (gameBoard[i] === '') empty.push(i);
+            if (empty.length === 0) return -1;
+            for (var j = 0; j < empty.length; j++) {
+                var idx = empty[j];
+                gameBoard[idx] = 'O';
+                if (checkWinner() === 'O') { gameBoard[idx] = ''; return idx; }
+                gameBoard[idx] = '';
+            }
+            for (var k = 0; k < empty.length; k++) {
+                var idx2 = empty[k];
+                gameBoard[idx2] = 'X';
+                if (checkWinner() === 'X') { gameBoard[idx2] = ''; return idx2; }
+                gameBoard[idx2] = '';
+            }
+            for (var m = 0; m < empty.length; m++) {
+                var pos = empty[m];
+                gameBoard[pos] = 'O';
+                var score = minimax(gameBoard, 0, false, 4);
+                gameBoard[pos] = '';
+                if (score > bestScore) { bestScore = score; bestMove = pos; }
+            }
+            return bestMove;
+        }
+        function minimax(board, depth, isMaximizing, maxDepth) {
+            var winner = checkWinnerBoard(board);
+            if (winner === 'O') return 10 - depth;
+            if (winner === 'X') return depth - 10;
+            if (isBoardFull(board)) return 0;
+            if (depth >= maxDepth) return evaluateBoard(board);
+            var empty = [];
+            for (var i = 0; i < 9; i++) if (board[i] === '') empty.push(i);
+            if (isMaximizing) {
+                var best = -Infinity;
+                for (var j = 0; j < empty.length; j++) {
+                    var idx = empty[j];
+                    board[idx] = 'O';
+                    var val = minimax(board, depth + 1, false, maxDepth);
+                    board[idx] = '';
+                    best = Math.max(best, val);
+                }
+                return best;
+            } else {
+                var best = Infinity;
+                for (var k = 0; k < empty.length; k++) {
+                    var idx2 = empty[k];
+                    board[idx2] = 'X';
+                    var val2 = minimax(board, depth + 1, true, maxDepth);
+                    board[idx2] = '';
+                    best = Math.min(best, val2);
+                }
+                return best;
+            }
+        }
+        function checkWinnerBoard(board) {
+            var lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            for (var i = 0; i < lines.length; i++) {
+                var a = lines[i][0], b = lines[i][1], c = lines[i][2];
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
+            }
+            return null;
+        }
+        function isBoardFull(board) {
+            for (var i = 0; i < 9; i++) if (board[i] === '') return false;
+            return true;
+        }
+        function evaluateBoard(board) {
+            var score = 0;
+            var center = 4, corners = [0,2,6,8], edges = [1,3,5,7];
+            if (board[center] === 'O') score += 3; else if (board[center] === 'X') score -= 3;
+            corners.forEach(function(c) { if (board[c] === 'O') score += 1.5; else if (board[c] === 'X') score -= 1.5; });
+            edges.forEach(function(e) { if (board[e] === 'O') score += 0.5; else if (board[e] === 'X') score -= 0.5; });
+            return score;
+        }
+        function checkWinner() { return checkWinnerBoard(gameBoard); }
+        function highlightWinningCells() {
+            var lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            var cells = document.querySelectorAll('.ttt-cell');
+            for (var i = 0; i < lines.length; i++) {
+                var a = lines[i][0], b = lines[i][1], c = lines[i][2];
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    cells[a].classList.add('win');
+                    cells[b].classList.add('win');
+                    cells[c].classList.add('win');
+                }
+            }
+        }
+
+        /* ══════════════════════════════════════════════════
+           SEND MESSAGE — OPENROUTER (openrouter/free auto-router)
+        ══════════════════════════════════════════════════ */
+        async function sendMessage() {
+            var input = document.getElementById('userInput');
+            var text = input.value.trim();
+            if (!text) return;
+            if (!checkTokensBeforeSend()) return;
+            if (!useToken()) {
+                showTokenMessage();
+                speakText('Your token is ended. If you get more token, you like this AI.');
+                return;
+            }
+
+            lastUserMessage = text;
+
+            var welcome = document.getElementById('welcomeState');
+            if (welcome && welcome.parentNode) welcome.style.display = 'none';
+
+            addMessage('user', text);
+            input.value = '';
+            input.style.height = 'auto';
+
+            var sendBtn = document.getElementById('sendBtn');
+            sendBtn.classList.add('loading');
+            sendBtn.disabled = true;
+
+            var chat = document.getElementById('chat');
+            var thinking = document.createElement('div');
+            thinking.className = 'thinking-state';
+            thinking.id = 'thinkingState';
+            thinking.innerHTML = '<span class="brain-spin"><i class="fas fa-brain"></i></span><span class="thinking-text">Cloto is thinking<span class="thinking-dots"></span></span>';
+            chat.appendChild(thinking);
+            chat.scrollTop = chat.scrollHeight;
+
+            var apiKey = document.getElementById('apiKey').value.trim();
+            var model = document.getElementById('model').value.trim() || 'openrouter/free';
+            var systemPrompt = getSystemPrompt();
+
+            var history = [{ role: 'system', content: systemPrompt }];
+            var msgs = messages.slice(-20);
+            for (var i = 0; i < msgs.length; i++) {
+                history.push({ role: msgs[i].role, content: msgs[i].content });
+            }
+
+            var url = 'https://openrouter.ai/api/v1/chat/completions';
+
+            var body = {
+                model: model,
+                messages: history,
+                temperature: 0.7,
+                max_tokens: 4000,
+
+                // IMPORTANT: stream=true makes OpenRouter send the answer
+                // progressively instead of waiting for the whole reply.
+                stream: true
+            };
+
+            var headers = {
+                'Content-Type': 'application/json',
+                'HTTP-Referer': window.location.href,
+                'X-Title': 'Cloto AI'
+            };
+            if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey;
+
+            var streamingBubble = null;
+            var fullContent = '';
+            var streamStarted = false;
+
+            try {
+                var res = await fetch(url, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    var errorText = await res.text();
+                    var errorMessage = errorText;
+                    try {
+                        var errorData = JSON.parse(errorText);
+                        if (errorData.error) {
+                            errorMessage = errorData.error.message || JSON.stringify(errorData.error);
+                        }
+                    } catch (ignore) {}
+                    throw new Error(errorMessage || ('HTTP ' + res.status));
+                }
+
+                await readOpenRouterStream(res, function(delta) {
+                    if (!streamStarted) {
+                        streamStarted = true;
+
+                        var thinkingEl = document.getElementById('thinkingState');
+                        if (thinkingEl) thinkingEl.remove();
+
+                        streamingBubble = createStreamingAssistantMessage();
+                    }
+
+                    fullContent += delta;
+                    updateStreamingAssistantMessage(streamingBubble, fullContent);
+                });
+
+                var thinkingEl = document.getElementById('thinkingState');
+                if (thinkingEl) thinkingEl.remove();
+
+                if (!streamStarted) {
+                    throw new Error('No response content was received from the model.');
+                }
+
+                finishStreamingAssistantMessage(streamingBubble, fullContent || 'No response content.');
+
+                if (voiceModeEnabled) speakText(fullContent);
+            } catch (err) {
+                var thinkingEl2 = document.getElementById('thinkingState');
+                if (thinkingEl2) thinkingEl2.remove();
+
+                if (streamingBubble) {
+                    streamingBubble.remove();
+                }
+
+                addMessage('assistant', '❌ ' + (err.message || 'Network error. Please try again.'));
+                speakText('I encountered an error. Please check your internet connection or switch to another free model.');
+            } finally {
+                sendBtn.classList.remove('loading');
+                sendBtn.disabled = false;
+            }
+        }
+
+        document.getElementById('userInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+        });
+        document.getElementById('userInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            var sb = document.getElementById('sidebar');
+            var bd = document.getElementById('sidebarBackdrop');
+            if (window.innerWidth <= 767 && sb.classList.contains('open')) {
+                if (!sb.contains(e.target) && e.target !== document.querySelector('.menu-btn') && !bd.contains(e.target)) closeSidebar();
+            }
+        });
+
+        (function init() {
+            var s = getSession();
+            if (s) { currentUserEmail = s.email || null; enterApp(s); }
+            if (synth) {
+                synth.getVoices();
+                synth.onvoiceschanged = function() { synth.getVoices(); };
+            }
+        })();
+
+        console.log('🚀 Cloto AI loaded — using openrouter/free auto-router!');
+        console.log('🌍 The AI detects your language and responds in that language.');
+        console.log('🎁 100% FREE — automatically picks the best available free model!');
+    </script>
+</body>
+</html>
